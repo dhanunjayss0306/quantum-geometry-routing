@@ -32,6 +32,11 @@ class ExperimentResult(BaseModel):
     swap_count: int
     cx_count: int
     depth: int
+    depth_2q: int
+    added_swap_count: int = 0
+    added_cx_count: int = 0
+    added_depth: int = 0
+    added_depth_2q: int = 0
     xx: float
     yy: float
     zz: float

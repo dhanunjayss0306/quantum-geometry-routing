@@ -15,8 +15,13 @@ function explain(r) {
   bits.push(`fidelity ${r.fidelity.toFixed(3)}`);
   if (r.condition === "protected") {
     bits.push(
-      `after discarding ${((1 - r.yield) * 100).toFixed(1)}% of shots that failed the parity check`
+      `after discarding ${((1 - r.yield) * 100).toFixed(1)}% of shots with a bad syndrome`
     );
+    if (r.added_swap_count || r.added_cx_count) {
+      bits.push(
+        `protection itself cost +${r.added_swap_count} SWAPs and +${r.added_cx_count} CX gates`
+      );
+    }
   } else if (r.condition === "noisy") {
     bits.push("under depolarizing + readout noise");
   } else {
@@ -25,8 +30,17 @@ function explain(r) {
   return bits.join(", ") + ".";
 }
 
+const TOPOLOGIES = [
+  ["t-shape", "t-shape (2016)"],
+  ["star", "star (2016 variant)"],
+  ["heavy-hex-21", "heavy-hex 21q (IBM-style)"],
+  ["heavy-hex-35", "heavy-hex 35q (IBM-style)"],
+  ["hyperbolic-20", "hyperbolic {7,3} 20q (future)"],
+  ["hyperbolic-43", "hyperbolic {7,3} 43q (future)"],
+];
+
 export default function RunExperiment() {
-  const [topology, setTopology] = React.useState("hyperbolic");
+  const [topology, setTopology] = React.useState("hyperbolic-20");
   const [condition, setCondition] = React.useState("noisy");
   const [shots, setShots] = React.useState(1000);
   const [result, setResult] = React.useState(null);
@@ -53,9 +67,9 @@ export default function RunExperiment() {
         <label>
           Topology
           <select value={topology} onChange={(e) => setTopology(e.target.value)}>
-            <option value="star">star (2016)</option>
-            <option value="heavy-hex">heavy-hex (today)</option>
-            <option value="hyperbolic">hyperbolic (future)</option>
+            {TOPOLOGIES.map(([v, label]) => (
+              <option key={v} value={v}>{label}</option>
+            ))}
           </select>
         </label>
         <label>
@@ -86,9 +100,12 @@ export default function RunExperiment() {
           <div className="metrics">
             <div><span>SWAPs</span><b>{result.swap_count}</b></div>
             <div><span>CX gates</span><b>{result.cx_count}</b></div>
-            <div><span>Depth</span><b>{result.depth}</b></div>
+            <div><span>2q depth</span><b>{result.depth_2q}</b></div>
             <div><span>Fidelity</span><b>{result.fidelity.toFixed(4)}</b></div>
             <div><span>Yield</span><b>{result.yield.toFixed(3)}</b></div>
+            {result.condition === "protected" && (
+              <div><span>Protection cost</span><b>+{result.added_swap_count} SWAPs, +{result.added_cx_count} CX</b></div>
+            )}
           </div>
           <p className="explanation">{explain(result)}</p>
         </div>
