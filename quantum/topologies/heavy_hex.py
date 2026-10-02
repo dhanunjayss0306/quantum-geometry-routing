@@ -1,14 +1,25 @@
-"""Heavy-hex topology -- the connectivity of modern IBM QPUs (e.g. 127-qubit Eagle).
+"""Heavy-hex topologies -- the connectivity of modern IBM QPUs.
 
 What "heavy-hex" means: start from a honeycomb (hexagonal) lattice, then put
 one extra qubit in the MIDDLE of every edge. The original corner qubits keep
 degree 3, the new edge qubits have degree 2. That exact pattern is what IBM
 uses on its current chips.
 
-We build a 35-qubit patch -- a "snippet" of the full 127-qubit chip, big
-enough that routing across it needs real SWAP detours, small enough to
-simulate after stripping idle qubits (see quantum/routing/transpiler.py).
+Two flavors live here:
+
+1. HeavyHexPatch(rows, cols): a subdivided-honeycomb patch of any size.
+   Used for the size-matched matrix variant (~21 qubits) and the scaling
+   sweep. Its name always carries its qubit count, e.g. "heavy-hex-35".
+
+2. Eagle127Topology: the REAL 127-qubit IBM Eagle coupling map, extracted
+   once from qiskit-ibm-runtime's FakeSherbrooke backend and stored as a
+   static edge list (eagle127_edges.json). No runtime dependency on
+   qiskit-ibm-runtime -- the map is just data. 127 nodes, 144 edges,
+   max degree 3, diameter 26.
 """
+
+import json
+import os
 
 import networkx as nx
 
@@ -33,15 +44,47 @@ def _heavy_hex_edges(rows: int = 2, cols: int = 2) -> tuple:
     return nxt, edges
 
 
-class HeavyHexTopology(TopologyBase):
-    name = "heavy-hex"
-    description = "35-qubit heavy-hex patch: subdivided honeycomb, like IBM's Eagle chips."
+class HeavyHexPatch(TopologyBase):
+    """Subdivided-honeycomb heavy-hex patch. Name carries the qubit count."""
 
     def __init__(self, rows: int = 2, cols: int = 2):
+        self._rows, self._cols = rows, cols
         self._num_qubits, self._edges = _heavy_hex_edges(rows, cols)
+
+    @property
+    def name(self) -> str:
+        return f"heavy-hex-{self._num_qubits}"
+
+    @property
+    def description(self) -> str:
+        return (f"{self._num_qubits}-qubit heavy-hex patch "
+                f"(subdivided {self._rows}x{self._cols} honeycomb).")
 
     def num_qubits(self) -> int:
         return self._num_qubits
+
+    def edges(self) -> list:
+        return self._edges
+
+
+# Backwards-compatible alias for the original 35-qubit patch.
+HeavyHexTopology = HeavyHexPatch
+
+
+class Eagle127Topology(TopologyBase):
+    """The real IBM Eagle 127-qubit heavy-hex coupling map (static data)."""
+
+    name = "heavy-hex-127"
+    description = ("127-qubit IBM Eagle heavy-hex coupling map, extracted from "
+                   "qiskit-ibm-runtime's FakeSherbrooke backend.")
+
+    def __init__(self):
+        path = os.path.join(os.path.dirname(__file__), "eagle127_edges.json")
+        with open(path) as f:
+            self._edges = [tuple(e) for e in json.load(f)]
+
+    def num_qubits(self) -> int:
+        return 127
 
     def edges(self) -> list:
         return self._edges
