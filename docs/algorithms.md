@@ -39,10 +39,15 @@ Input: counts from XX, YY, ZZ circuits. Output: F in [0,1].
 <PP> = (N_agree - N_disagree)/N. Then F = (1 + <XX> - <YY> + <ZZ>)/4.
 The YY sign is negative because |Phi+> anti-correlates in the Y basis.
 
-## 8. Syndrome post-selection
-Input: raw counts + expected parity per correlator. Output: kept counts, yield.
-Discard shots where XX/ZZ disagree or YY agree (these are certain errors).
-Fidelity is recomputed on survivors; yield = kept/total.
+## 8. Syndrome post-selection (ancilla-based, honest)
+Input: counts from protected XX/YY/ZZ circuits (4-bit outcomes:
+syn_xx syn_zz d1 d0). Output: fidelity from data bits, yield.
+After routing, one ancilla measures the Bell stabilizers ZZ then XX via
+mid-circuit measurement (phase kickback for XX); the transpiler places the
+ancilla and routes the extra CNOTs. Keep shots with syndrome 00; compute
+<XX>,<YY>,<ZZ> from the DATA bits only. Selection and scoring use disjoint
+bits, so random inputs cannot fake F=1. Yield = kept/total; the added
+SWAP/CX/depth vs the unprotected circuit is reported as protection overhead.
 
 ## 9. Topology comparison
 Input: the 9 result dicts. Output: tables + charts.

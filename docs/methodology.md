@@ -14,8 +14,9 @@ qubits on a quantum cloud processor?
 5. **Simulate** the XX, YY, ZZ correlator circuits on AerSimulator:
    - ideal: no noise model
    - noisy: depolarizing (p1=0.001, p2=0.01) + readout (0.02) errors
-   - protected: noisy + syndrome post-selection (discard shots failing
-     the parity check; XX/ZZ must agree, YY must disagree)
+   - protected: noisy + ancilla syndrome checks (one ancilla measures the
+     ZZ then XX stabilizers via mid-circuit measurement; keep only shots
+     with a clean syndrome; correlators computed from data bits only)
 6. **Compute** fidelity F = (1 + <XX> - <YY> + <ZZ>)/4 and survival yield.
 7. **Record** everything (config, seed, versions implied by
    requirements.txt) as JSON; aggregate to CSV; plot.

@@ -1,8 +1,8 @@
-"""Build the 8-slide hackathon deck from real experiment results.
+"""Build the hackathon deck from real experiment results.
 
 The handbook caps the deck at 4-8 slides, so this generates exactly 8.
-Every number and chart comes from results/ -- rerun scripts/run_all_cases.py
-first, then this script, to regenerate the deck with fresh data.
+Every number comes from results/tables/*.csv -- rerun
+scripts/run_all_cases.py and scripts/scaling_sweep.py first, then this.
 
 Usage (from repo root):
     .venv/bin/python scripts/build_deck.py
@@ -10,11 +10,13 @@ Output: results/reports/quantum-geometry-routing-deck.pptx
 """
 
 import csv
+import glob
 import os
+import re
 
 from pptx import Presentation
 from pptx.dml.color import RGBColor
-from pptx.util import Emu, Inches, Pt
+from pptx.util import Inches, Pt
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FIGURES = os.path.join(REPO_ROOT, "results", "figures")
@@ -26,8 +28,6 @@ BG = RGBColor(0x0D, 0x11, 0x17)
 FG = RGBColor(0xE6, 0xED, 0xF3)
 MUTED = RGBColor(0x8B, 0x94, 0x9E)
 ACCENT = RGBColor(0x58, 0xA6, 0xFF)
-GREEN = RGBColor(0x3F, 0xB9, 0x50)
-RED = RGBColor(0xF8, 0x51, 0x49)
 
 prs = Presentation()
 prs.slide_width = Inches(13.333)
@@ -96,20 +96,48 @@ def content_slide(title, bullets, image=None, image_caption=""):
     return slide
 
 
-def load_summary():
-    with open(os.path.join(TABLES, "summary.csv")) as f:
+def load_csv(name):
+    with open(os.path.join(TABLES, name)) as f:
         return list(csv.DictReader(f))
 
 
+def count_tests():
+    n = 0
+    for path in glob.glob(os.path.join(REPO_ROOT, "tests", "test_*.py")):
+        with open(path) as f:
+            n += len(re.findall(r"^def test_", f.read(), re.M))
+    return n
+
+
 def main():
-    rows = load_summary()
+    rows = load_csv("summary.csv")
     by = {(r["topology"], r["condition"]): r for r in rows}
+    scale = load_csv("scaling.csv")
 
     def fid(t, c):
         return float(by[(t, c)]["fidelity"])
 
     def swaps(t):
-        return by[(t, "noisy")]["swap_count"]
+        return int(float(by[(t, "noisy")]["swap_count"]))
+
+    def diam(t):
+        return int(float(by[(t, "noisy")]["graph_distance"]))
+
+    def yld(t):
+        return float(by[(t, "protected")]["yield"])
+
+    def added(t, k):
+        return int(float(by[(t, "protected")][k]))
+
+    topo_order = ["t-shape", "heavy-hex-21", "hyperbolic-20"]
+    labels = {"t-shape": "T-shape (5q, 2016)",
+              "heavy-hex-21": "heavy-hex (21q, IBM-style)",
+              "hyperbolic-20": "hyperbolic {7,3} (20q, future)"}
+
+    # scaling extremes for the recommendation
+    hh127 = next(r for r in scale if r["topology"] == "heavy-hex-127")
+    hyp_big = max((r for r in scale if r["family"] == "hyperbolic"),
+                  key=lambda r: int(r["num_qubits"]))
 
     # 1. Title --------------------------------------------------------------
     title_slide(
@@ -123,60 +151,69 @@ def main():
     content_slide("The problem: distant qubits pay a SWAP tax", [
         "Cloud QPUs have 100+ qubits, but each qubit talks to only a few neighbors.",
         "Entangling distant qubits needs SWAP detours along the coupling graph.",
-        "Each SWAP = 3 CNOTs = more noise exposure = worse entanglement.",
+        "Each SWAP = more gates = more noise exposure = worse entanglement.",
         "Question: which coupling-graph geometry minimizes this tax?",
     ])
 
     # 3. Experiment ---------------------------------------------------------
-    content_slide("Our experiment: 3 x 3 = 9 real simulations", [
+    content_slide("Our experiment: 9 real simulations + a scaling sweep", [
         "Bell state |Phi+> routed between the two farthest qubits of each chip (worst case).",
-        "Topologies: star (5q, 2016-era), heavy-hex (35q, IBM today), hyperbolic (22q, future idea).",
-        "Conditions: ideal, noisy (depolarizing + readout), noisy + protection.",
-        "Metrics: SWAP count, 2-qubit depth, Bell-state fidelity, post-selection yield.",
+        "Matrix: T-shape (5q, 2016) x heavy-hex (21q, IBM-style) x hyperbolic {7,3} (20q).",
+        "Conditions: ideal, noisy (depolarizing + readout), noisy + ancilla protection.",
+        "Scaling sweep: 13 chips, 20 to 127 qubits, 3 families -- how does the worst trip grow?",
     ])
 
     # 4. How it works -------------------------------------------------------
-    content_slide("How it works", [
+    content_slide("How it works (and why you can trust it)", [
         "H + CNOT makes the Bell state; Qiskit transpile() routes it onto the coupling map.",
         "Fidelity from XX/YY/ZZ correlators: F = (1 + <XX> - <YY> + <ZZ>) / 4.",
-        "Protection = syndrome post-selection: discard shots that fail the parity check.",
-        "Everything seeded and reproducible: quantum/ -> algorithms/ -> FastAPI -> React dashboard.",
+        "Protection: an ancilla measures the ZZ then XX stabilizers mid-circuit; "
+        "we keep only clean-syndrome shots and score the data bits alone.",
+        "Selection and scoring use disjoint bits -- random noise cannot fake F=1.",
     ])
 
     # 5. Routing cost -------------------------------------------------------
-    content_slide("Result 1: the detour depends on the road-map", [
-        f"Star: {swaps('star')} SWAP -- tiny chip, neighbors are close.",
-        f"Heavy-hex: {swaps('heavy-hex')} SWAPs -- 35 qubits but a long, sparse map (diameter 14).",
-        f"Hyperbolic: {swaps('hyperbolic')} SWAPs -- 22 qubits packed at diameter 6 (exponential expansion).",
+    cost_lines = [
+        f"{labels[t]}: {swaps(t)} SWAPs across diameter {diam(t)}."
+        for t in topo_order
+    ]
+    content_slide("Result 1: the detour depends on the road-map", cost_lines + [
         "Every SWAP is noise exposure: routing cost is the whole story.",
     ], image="routing_cost.png",
-        image_caption="SWAPs and circuit depth per topology (worst-case pair)")
+        image_caption="SWAPs and two-qubit depth per topology (worst-case pair)")
 
-    # 6. Fidelity -----------------------------------------------------------
-    content_slide("Result 2: noise separates the topologies", [
-        "Ideal world: all three hit fidelity 1.000 -- the science is correct.",
-        f"Noisy world: star {fid('star','noisy'):.3f}, heavy-hex {fid('heavy-hex','noisy'):.3f}, "
-        f"hyperbolic {fid('hyperbolic','noisy'):.3f}.",
-        "Protection restores 1.000 everywhere -- but watch what it costs.",
-        "Longer detours (heavy-hex) collect more errors.",
+    # 6. Fidelity + honest protection ---------------------------------------
+    gain = {t: fid(t, "protected") - fid(t, "noisy") for t in topo_order}
+    content_slide("Result 2: protection helps -- honestly", [
+        f"Noisy fidelity: " + ", ".join(
+            f"{labels[t].split(' (')[0]} {fid(t,'noisy'):.3f}" for t in topo_order) + ".",
+        f"Protected: " + ", ".join(
+            f"{labels[t].split(' (')[0]} {fid(t,'protected'):.3f} "
+            f"(+{gain[t]:.3f})" for t in topo_order) + ".",
+        f"Cost of protection: +{added('heavy-hex-21','added_swap_count')} SWAP, "
+        f"+{added('heavy-hex-21','added_cx_count')} CX, "
+        f"~{(1-yld('heavy-hex-21'))*100:.0f}% of shots discarded.",
+        "It never reaches 1.0 -- some errors always slip through. That is the honest trade.",
     ], image="fidelity.png",
         image_caption="Bell-state fidelity across topologies and conditions")
 
-    # 7. Key finding --------------------------------------------------------
-    content_slide("Key finding: protection is a trade, and scaling wins", [
-        "Protection is not free: heavy-hex discards ~9% of shots to recover fidelity; star only ~5%.",
-        "Star wins raw fidelity for one Bell pair -- but it cannot scale past 5 qubits.",
-        "Hyperbolic holds 22 qubits at diameter 6; heavy-hex needs diameter 14 for 35.",
-        "Verdict: for cloud-scale entanglement, expansion beats sprawl.",
-    ], image="protection_tradeoff.png",
-        image_caption="Protection restores fidelity (up) at a yield cost (left)")
+    # 7. Scaling + recommendation -------------------------------------------
+    content_slide("Result 3: scaling decides the future (recommendation)", [
+        f"At 127 qubits, heavy-hex (real IBM Eagle map) has diameter {hh127['diameter']}; "
+        f"hyperbolic {hyp_big['num_qubits']}q has diameter {hyp_big['diameter']}.",
+        "Heavy-hex scales ~2.3*sqrt(N) -- worse than a plain grid (~1.8*sqrt(N)).",
+        "Recommend: max degree 3, diameter target log(N), no long degree-2 wire chains, "
+        "small faces (<=8), budget error detection only for the longest routes.",
+        "Full evidence: docs/recommendation.md + results/tables/scaling.csv.",
+    ], image="scaling_diameter.png",
+        image_caption="Worst-case hops vs qubit count (log-x): hyperbolic grows slowest")
 
-    # 8. System + future ----------------------------------------------------
-    content_slide("System and future scope", [
-        "Modular repo: quantum/ core, algorithms/ matrix, backend/ FastAPI, frontend/ React dashboard.",
-        "11 pytest tests, seeded reproducibility, docs for every layer.",
-        "Next: real QPU execution, fake-backend noise models, noise-aware routing.",
-        "The question scales with the hardware -- so does the answer.",
+    # 8. System -------------------------------------------------------------
+    content_slide("System and reproducibility", [
+        f"Modular repo: quantum/ core, algorithms/ matrix+sweep, backend/ FastAPI, frontend/ React.",
+        f"{count_tests()} pytest tests, fixed seeds, pinned requirements.",
+        "Topologies: T-shape, star, heavy-hex patches (21/35/106), real Eagle-127, {7,3} tiling, grid.",
+        "Next: real QPU runs, noise-aware routing, non-planar shortcut couplers.",
     ])
 
     os.makedirs(REPORTS, exist_ok=True)
