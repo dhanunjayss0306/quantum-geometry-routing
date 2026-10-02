@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+# Secrets
+.env
+# Node
+node_modules/
+frontend/dist/
+# Results: figures/reports/per-run JSONs are committed so the API and
+# dashboard work straight after clone; regenerate with scripts/run_all_cases.py
+data/raw/
+# Test cache
+.pytest_cache/
