@@ -26,7 +26,12 @@ from quantum.noise.noise_models import (
 from quantum.noise.noisy_simulation import simulate_counts
 from quantum.fidelity.correlators import build_correlator_circuits
 from quantum.fidelity.fidelity import fidelity_report
-from quantum.fidelity.post_selection import protected_fidelity
+from quantum.fidelity.post_selection import (
+    create_protected_bell_circuit,
+    route_protected_circuit,
+    build_protected_correlator_circuits,
+    protected_fidelity,
+)
 
 CONDITIONS = ["ideal", "noisy", "protected"]
 
@@ -66,18 +71,35 @@ def run_case(topology, condition: str, shots: int = 2000, seed: int = 42) -> dic
     routing = analyze_routing(strip_idle_qubits(routed))
 
     noise_model = None if condition == "ideal" else build_depolarizing_noise_model()
-
-    raw = {}
-    for name, circ in build_correlator_circuits(routed).items():
-        slim = strip_idle_qubits(circ)
-        raw[name] = simulate_counts(slim, noise_model=noise_model,
-                                    shots=shots, seed=seed)
+    # Protection overhead, reported for the 'protected' condition only.
+    added = {"swap_count": 0, "cx_count": 0, "depth": 0, "depth_2q": 0}
 
     if condition == "protected":
+        # Route the full 3-qubit protected circuit (Bell + syndrome ancilla);
+        # the transpiler places the ancilla and inserts the extra SWAPs.
+        routed_prot = route_protected_circuit(
+            create_protected_bell_circuit(), topology.coupling_map(),
+            initial_layout=[a, b], seed=seed,
+        )
+        routing_prot = analyze_routing(strip_idle_qubits(routed_prot))
+        for k in added:
+            added[k] = routing_prot[k] - routing[k]
+        routing = routing_prot  # protected case reports its true (higher) cost
+
+        raw = {}
+        for name, circ in build_protected_correlator_circuits(routed_prot).items():
+            slim = strip_idle_qubits(circ)
+            raw[name] = simulate_counts(slim, noise_model=noise_model,
+                                        shots=shots, seed=seed)
         rep = protected_fidelity(raw["XX"], raw["YY"], raw["ZZ"])
         fidelity, yld = rep["fidelity"], rep["yield"]
         xx, yy, zz = rep["xx"], rep["yy"], rep["zz"]
     else:
+        raw = {}
+        for name, circ in build_correlator_circuits(routed).items():
+            slim = strip_idle_qubits(circ)
+            raw[name] = simulate_counts(slim, noise_model=noise_model,
+                                        shots=shots, seed=seed)
         rep = fidelity_report(raw["XX"], raw["YY"], raw["ZZ"])
         fidelity, yld = rep["fidelity"], 1.0
         xx, yy, zz = rep["xx"], rep["yy"], rep["zz"]
@@ -91,6 +113,11 @@ def run_case(topology, condition: str, shots: int = 2000, seed: int = 42) -> dic
         "swap_count": routing["swap_count"],
         "cx_count": routing["cx_count"],
         "depth": routing["depth"],
+        "depth_2q": routing["depth_2q"],
+        "added_swap_count": added["swap_count"],
+        "added_cx_count": added["cx_count"],
+        "added_depth": added["depth"],
+        "added_depth_2q": added["depth_2q"],
         "xx": round(xx, 4),
         "yy": round(yy, 4),
         "zz": round(zz, 4),

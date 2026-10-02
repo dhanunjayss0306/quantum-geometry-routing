@@ -15,6 +15,8 @@ from qiskit.transpiler import CouplingMap
 # Gates the routed circuit is allowed to use. Keeping "swap" visible
 # (instead of decomposing it) lets us COUNT the routing cost directly.
 BASIS_GATES = ["id", "rz", "sx", "x", "h", "cx", "swap", "measure"]
+# Protected circuits also use mid-circuit reset for the syndrome ancilla.
+BASIS_GATES_WITH_RESET = BASIS_GATES + ["reset"]
 
 
 def route_circuit(
@@ -23,6 +25,7 @@ def route_circuit(
     initial_layout=None,
     optimization_level: int = 1,
     seed: int = 42,
+    basis_gates=None,
 ) -> QuantumCircuit:
     """Transpile a logical circuit onto a physical coupling map.
 
@@ -31,8 +34,11 @@ def route_circuit(
         coupling_map: hardware connectivity (the "road map").
         initial_layout: optional list mapping logical -> physical qubits,
             e.g. [1, 3] puts logical 0 on physical 1, logical 1 on physical 3.
+            A dict {virtual: physical} also works for partial layouts.
         optimization_level: 0-3, how hard the transpiler optimizes.
         seed: fixed seed so results are reproducible.
+        basis_gates: gate set; defaults to BASIS_GATES. Use
+            BASIS_GATES_WITH_RESET for circuits with mid-circuit reset.
 
     Returns:
         The routed physical circuit (may contain SWAP gates).
@@ -40,7 +46,7 @@ def route_circuit(
     return transpile(
         circuit,
         coupling_map=coupling_map,
-        basis_gates=BASIS_GATES,
+        basis_gates=basis_gates or BASIS_GATES,
         initial_layout=initial_layout,
         optimization_level=optimization_level,
         seed_transpiler=seed,
