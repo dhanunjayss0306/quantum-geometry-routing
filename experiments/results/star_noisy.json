@@ -1,0 +1,25 @@
+{
+  "topology": "star",
+  "condition": "noisy",
+  "num_qubits": 5,
+  "bell_pair": [
+    1,
+    2
+  ],
+  "graph_distance": 2,
+  "swap_count": 1,
+  "cx_count": 1,
+  "depth": 2,
+  "xx": 0.899,
+  "yy": -0.883,
+  "zz": 0.895,
+  "fidelity": 0.9193,
+  "yield": 1.0,
+  "shots": 2000,
+  "seed": 42,
+  "noise": {
+    "p1": 0.001,
+    "p2": 0.01,
+    "readout": 0.02
+  }
+}

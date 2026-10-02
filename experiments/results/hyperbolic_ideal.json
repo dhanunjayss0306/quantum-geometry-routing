@@ -1,0 +1,21 @@
+{
+  "topology": "hyperbolic",
+  "condition": "ideal",
+  "num_qubits": 22,
+  "bell_pair": [
+    10,
+    16
+  ],
+  "graph_distance": 6,
+  "swap_count": 5,
+  "cx_count": 1,
+  "depth": 5,
+  "xx": 1.0,
+  "yy": -1.0,
+  "zz": 1.0,
+  "fidelity": 1.0,
+  "yield": 1.0,
+  "shots": 2000,
+  "seed": 42,
+  "noise": null
+}

@@ -1,0 +1,25 @@
+{
+  "topology": "heavy-hex",
+  "condition": "protected",
+  "num_qubits": 35,
+  "bell_pair": [
+    0,
+    15
+  ],
+  "graph_distance": 14,
+  "swap_count": 13,
+  "cx_count": 1,
+  "depth": 8,
+  "xx": 1.0,
+  "yy": -1.0,
+  "zz": 1.0,
+  "fidelity": 1.0,
+  "yield": 0.9092,
+  "shots": 2000,
+  "seed": 42,
+  "noise": {
+    "p1": 0.001,
+    "p2": 0.01,
+    "readout": 0.02
+  }
+}
