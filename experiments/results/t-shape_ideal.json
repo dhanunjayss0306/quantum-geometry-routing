@@ -1,0 +1,26 @@
+{
+  "topology": "t-shape",
+  "condition": "ideal",
+  "num_qubits": 5,
+  "bell_pair": [
+    0,
+    4
+  ],
+  "graph_distance": 3,
+  "swap_count": 2,
+  "cx_count": 1,
+  "depth": 3,
+  "depth_2q": 2,
+  "added_swap_count": 0,
+  "added_cx_count": 0,
+  "added_depth": 0,
+  "added_depth_2q": 0,
+  "xx": 1.0,
+  "yy": -1.0,
+  "zz": 1.0,
+  "fidelity": 1.0,
+  "yield": 1.0,
+  "shots": 2000,
+  "seed": 42,
+  "noise": null
+}

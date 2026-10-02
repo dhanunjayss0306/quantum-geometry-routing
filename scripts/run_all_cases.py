@@ -23,14 +23,16 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from quantum.topologies.star import StarTopology
-from quantum.topologies.heavy_hex import HeavyHexTopology
-from quantum.topologies.hyperbolic import HyperbolicTopology
+from quantum.topologies.tshape import TShapeTopology
+from quantum.topologies.heavy_hex import HeavyHexPatch
+from quantum.topologies.hyperbolic import HyperbolicTiling
 from algorithms.experiment_matrix import run_matrix, CONDITIONS
 
 SHOTS = 2000
 SEED = 42
-TOPOLOGIES = [StarTopology(), HeavyHexTopology(), HyperbolicTopology()]
+# Headline comparison at matched sizes (~20 qubits); the T-shape is the
+# 5-qubit 2016 reference. The full size story lives in scaling_sweep.py.
+TOPOLOGIES = [TShapeTopology(), HeavyHexPatch(1, 2), HyperbolicTiling(17)]
 COLORS = {"ideal": "#2ca02c", "noisy": "#d62728", "protected": "#1f77b4"}
 
 
@@ -77,8 +79,8 @@ def chart_routing_cost(results):
     topologies = [t.name for t in TOPOLOGIES]
     x = range(len(topologies))
     for ax, metric, title in zip(axes,
-                                 ["swap_count", "depth"],
-                                 ["SWAP gates inserted", "Two-qubit circuit depth"]):
+                                 ["swap_count", "depth_2q"],
+                                 ["SWAP gates inserted", "Two-qubit gate depth"]):
         # routing cost is identical across conditions; take 'ideal'
         vals = [next(r[metric] for r in results
                      if r["topology"] == t and r["condition"] == "ideal")
@@ -91,6 +93,43 @@ def chart_routing_cost(results):
     fig.suptitle("Routing cost: Bell state across each chip's diameter")
     fig.tight_layout()
     fig.savefig(f"{REPO_ROOT}/results/figures/routing_cost.png", dpi=150)
+    plt.close(fig)
+
+
+def chart_protection_cost(results):
+    """What protection costs (extra SWAPs/depth) vs what it buys (fidelity)."""
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    topologies = [t.name for t in TOPOLOGIES]
+    x = range(len(topologies))
+    prot = [next(r for r in results
+                 if r["topology"] == t and r["condition"] == "protected")
+            for t in topologies]
+    noisy = [next(r for r in results
+                  if r["topology"] == t and r["condition"] == "noisy")
+             for t in topologies]
+    ax = axes[0]
+    w = 0.35
+    ax.bar([p - w / 2 for p in x],
+           [r["added_swap_count"] for r in prot], w, label="+ SWAPs")
+    ax.bar([p + w / 2 for p in x],
+           [r["added_depth_2q"] for r in prot], w, label="+ 2q depth")
+    ax.set_xticks(list(x))
+    ax.set_xticklabels(topologies)
+    ax.set_title("Protection overhead (extra gates)")
+    ax.legend()
+    ax = axes[1]
+    gains = [p["fidelity"] - n["fidelity"] for p, n in zip(prot, noisy)]
+    yields = [p["yield"] for p in prot]
+    ax.bar([p - w / 2 for p in x], gains, w, label="fidelity gain")
+    ax.bar([p + w / 2 for p in x],
+           [1 - y for y in yields], w, label="shots discarded")
+    ax.set_xticks(list(x))
+    ax.set_xticklabels(topologies)
+    ax.set_title("Protection payoff: fidelity gained vs shots lost")
+    ax.legend()
+    fig.suptitle("Syndrome protection: cost (left) vs payoff (right)")
+    fig.tight_layout()
+    fig.savefig(f"{REPO_ROOT}/results/figures/protection_cost.png", dpi=150)
     plt.close(fig)
 
 
@@ -124,12 +163,14 @@ def main():
     chart_fidelity(results)
     chart_routing_cost(results)
     chart_protection_tradeoff(results)
+    chart_protection_cost(results)
     print("charts written to results/figures/")
     print("\nSummary:")
     for r in results:
-        print(f"  {r['topology']:12s} {r['condition']:9s} "
-              f"SWAPs={r['swap_count']:3d} depth={r['depth']:2d} "
-              f"F={r['fidelity']:.4f} yield={r['yield']:.3f}")
+        print(f"  {r['topology']:14s} {r['condition']:9s} "
+              f"SWAPs={r['swap_count']:3d} depth2q={r['depth_2q']:2d} "
+              f"F={r['fidelity']:.4f} yield={r['yield']:.3f} "
+              f"+SWAPs={r['added_swap_count']} +CX={r['added_cx_count']}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,30 @@
+{
+  "topology": "heavy-hex-21",
+  "condition": "protected",
+  "num_qubits": 21,
+  "bell_pair": [
+    0,
+    9
+  ],
+  "graph_distance": 10,
+  "swap_count": 10,
+  "cx_count": 5,
+  "depth": 18,
+  "depth_2q": 13,
+  "added_swap_count": 1,
+  "added_cx_count": 4,
+  "added_depth": 11,
+  "added_depth_2q": 7,
+  "xx": 0.8905,
+  "yy": -0.8997,
+  "zz": 0.893,
+  "fidelity": 0.9208,
+  "yield": 0.8807,
+  "shots": 2000,
+  "seed": 42,
+  "noise": {
+    "p1": 0.001,
+    "p2": 0.01,
+    "readout": 0.02
+  }
+}

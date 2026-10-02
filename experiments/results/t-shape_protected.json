@@ -1,0 +1,30 @@
+{
+  "topology": "t-shape",
+  "condition": "protected",
+  "num_qubits": 5,
+  "bell_pair": [
+    0,
+    4
+  ],
+  "graph_distance": 3,
+  "swap_count": 3,
+  "cx_count": 5,
+  "depth": 13,
+  "depth_2q": 7,
+  "added_swap_count": 1,
+  "added_cx_count": 4,
+  "added_depth": 10,
+  "added_depth_2q": 5,
+  "xx": 0.9123,
+  "yy": -0.9123,
+  "zz": 0.9115,
+  "fidelity": 0.934,
+  "yield": 0.9133,
+  "shots": 2000,
+  "seed": 42,
+  "noise": {
+    "p1": 0.001,
+    "p2": 0.01,
+    "readout": 0.02
+  }
+}
