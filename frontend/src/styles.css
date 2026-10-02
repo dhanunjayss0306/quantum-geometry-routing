@@ -31,3 +31,49 @@ nav button.active { background: #1f6feb; border-color: #1f6feb; }
 .metrics b { font-size: 22px; }
 .explanation { background: #0d1117; border-left: 3px solid #1f6feb; padding: 10px 14px; border-radius: 0 6px 6px 0; }
 .error { background: #3d1115; border: 1px solid #d62728; padding: 12px; border-radius: 8px; }
+
+/* ---- 3D viewer theme variables (dark default, light via media query) ---- */
+:root {
+  --canvas-bg: #0d1117;
+  --qubit: #1f6feb;
+  --accent: #f0b429;
+  --edge: #3a4552;
+  --pulse: #ffffff;
+  --grid: #232b36;
+  --surface: #1f6feb;
+  --label-bg: rgba(13, 17, 23, 0.85);
+  --label-text: #ffffff;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --canvas-bg: #f6f8fa;
+    --qubit: #0969da;
+    --accent: #9a6700;
+    --edge: #b0b8c1;
+    --pulse: #1f2328;
+    --grid: #d0d7de;
+    --surface: #0969da;
+    --label-bg: rgba(255, 255, 255, 0.9);
+    --label-text: #1f2328;
+  }
+}
+
+/* ---- 3D viewer ---- */
+.topo3d { background: var(--canvas-bg); }
+.topo3d:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.topo3d-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.topo3d-head h3 { margin: 0; }
+.topo3d-head button {
+  background: #161b22; color: #e6edf3; border: 1px solid #30363d;
+  padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px;
+}
+.q3d-label {
+  font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 10px;
+  white-space: nowrap; border: 1px solid var(--accent);
+}
+.check { display: flex !important; flex-direction: row !important; align-items: center; gap: 6px; cursor: pointer; }
+.check input { width: 16px; height: 16px; accent-color: #1f6feb; }
+@media (max-width: 640px) {
+  .topo3d { min-height: 340px; }
+  .grid { grid-template-columns: 1fr; }
+}

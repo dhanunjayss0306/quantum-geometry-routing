@@ -1,6 +1,7 @@
 import React from "react";
 import { api } from "./api/client";
 import TopologyGraph from "./components/TopologyGraph";
+import Topology3DTab from "./components/Topology3DTab";
 import ResultsTable from "./components/ResultsTable";
 import RunExperiment from "./components/RunExperiment";
 import "./styles.css";
@@ -59,13 +60,13 @@ export default function App() {
         <h1>Quantum Geometry Routing</h1>
         <p>Which road-map should future quantum clouds use? Bell-state routing across three chip topologies.</p>
         <nav>
-          {["dashboard", "topologies", "run"].map((t) => (
+          {["dashboard", "topologies", "3d", "run"].map((t) => (
             <button
               key={t}
               className={tab === t ? "active" : ""}
               onClick={() => setTab(t)}
             >
-              {t[0].toUpperCase() + t.slice(1)}
+              {t === "3d" ? "3D" : t[0].toUpperCase() + t.slice(1)}
             </button>
           ))}
         </nav>
@@ -90,6 +91,9 @@ export default function App() {
             </div>
           ))}
         </main>
+      )}
+      {tab === "3d" && topologies.length > 0 && (
+        <Topology3DTab topologies={topologies} results={results} />
       )}
       {tab === "run" && (
         <main>
