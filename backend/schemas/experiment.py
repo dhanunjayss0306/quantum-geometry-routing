@@ -54,3 +54,9 @@ class TopologyInfo(BaseModel):
     description: str
     num_qubits: int
     edges: list
+    positions3d: list
+    surface: dict
+    bell_pair: list
+    route: list
+    diameter: int
+    family: str

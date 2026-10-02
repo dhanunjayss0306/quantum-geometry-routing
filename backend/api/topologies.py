@@ -22,15 +22,9 @@ def list_topologies():
 @router.get("/topologies/{name}", response_model=TopologyInfo)
 def get_topology(name: str):
     try:
-        topo = topology_service.get_topology(name)
+        return topology_service.topology_detail(name)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
-    return {
-        "name": topo.name,
-        "description": topo.description,
-        "num_qubits": topo.num_qubits(),
-        "edges": [list(e) for e in topo.edges()],
-    }
 
 
 @router.get("/results")
