@@ -77,9 +77,10 @@ const Topology3D = React.forwardRef(function Topology3D(
     pts.forEach((p) => sphere.expandByPoint(p));
     const fitDist = Math.max(sphere.radius, 0.5) / Math.sin(THREE.MathUtils.degToRad(22.5));
     const dir = new THREE.Vector3(0.9, 0.65, 1).normalize();
-    camera.position.copy(sphere.center).addScaledVector(dir, fitDist * 1.25);
+    camera.position.copy(sphere.center).addScaledVector(dir, fitDist * 1.4);
 
     const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.copy(sphere.center);
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
     controls.autoRotate = autoRotateRef.current && !reducedMotion;
