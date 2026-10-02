@@ -1,14 +1,18 @@
+# Pinned to the exact versions tested on 2026-10-03 (Python 3.12, Linux).
+# Your laptop runs the same: qiskit 2.5.2, qiskit-aer 0.17.2, networkx 3.7.
 # Quantum core
-qiskit>=1.0
-qiskit-aer>=0.14
+qiskit==2.5.2
+qiskit-aer==0.17.2
 # Graphs for topology construction
-networkx>=3.0
-numpy>=1.24
+networkx==3.7
+numpy==2.5.3
 # Charts for results
-matplotlib>=3.7
-# Backend (Phase 12)
-fastapi>=0.110
-uvicorn>=0.29
-pydantic>=2.0
+matplotlib==3.11.2
+# Backend
+fastapi==0.142.2
+uvicorn==0.54.0
+pydantic==2.13.5
+# Deck builder
+python-pptx==1.0.2
 # Dev / testing
-pytest>=8.0
+pytest==9.1.1
