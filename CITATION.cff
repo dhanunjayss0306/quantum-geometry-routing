@@ -1,6 +1,5 @@
-# This file describes how to cite this repository. Fill in the real author
-# names before publishing the Zenodo record; the DOI stays commented until
-# Zenodo issues one.
+# This file describes how to cite this repository. Author names confirmed
+# 2026-10-03; the DOI stays commented until Zenodo issues one.
 cff-version: 1.2.0
 title: "Quantum Geometry Routing: Bell-state routing benchmark across quantum chip topologies"
 message: "If you use this software or dataset, please cite it as below."
@@ -9,12 +8,12 @@ license: MIT
 repository-code: "https://github.com/dhanunjayss0306/quantum-geometry-routing"
 # doi: 10.5281/zenodo.XXXXXXX
 authors:
-  - family-names: "[Author 1]"
-    given-names: "[Given]"
-  - family-names: "[Author 2]"
-    given-names: "[Given]"
-  - family-names: "[Author 3]"
-    given-names: "[Given]"
+  - family-names: "Reddy"
+    given-names: "Dhanunjay"
+  - family-names: "Satyanarayana"
+    given-names: "Mohit Sai"
+  - family-names: "Prasad"
+    given-names: "Leela"
 keywords:
   - quantum computing
   - qubit routing
