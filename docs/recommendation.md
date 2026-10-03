@@ -36,7 +36,7 @@ discarded (yield 0.795).
    degree 4 buys little diameter improvement (it still scales as √N) while
    each extra coupler adds crosstalk and frequency-collision risk.
 
-2. **Slower diameter growth than the grid, in the tested range.** In the
+2. **Slower diameter growth than the grid in the tested range.** In the
    tested range, the `{7,3}` family showed slower diameter growth than the
    square grid and heavy-hex; whether growth is logarithmic is not
    established by five points from one growth pattern — the data are
@@ -78,10 +78,11 @@ discarded (yield 0.795).
 
 ## Future hypotheses
 
-- **~N/log N long-range shortcut couplers.** Our data covers planar graphs
-  only, but the mechanism is clear -- diameter is set by the longest
-  shortest path, and a few non-planar shortcuts collapse it (small-world
-  effect). Worth simulating next; not yet measured.
+- **~N/log N long-range shortcut couplers (unmeasured hypothesis).** Our
+  data covers planar graphs only. One possible mechanism is that
+  diameter is set by the longest shortest path, and a few non-planar
+  shortcuts collapse it (small-world effect). Worth simulating next; not
+  yet measured.
 - A `{7,3}` patch is a planar graph, which keeps it compatible in principle
   with planar fabrication processes -- but this repository does not
   demonstrate fabrication feasibility or device-level implementation, no
@@ -91,9 +92,10 @@ discarded (yield 0.795).
 ## Caveats
 
 - Noise is simulated depolarizing + readout error, not a real device's
-  correlated noise. Relative ordering should hold; absolute fidelities will
-  differ on hardware.
+  correlated noise. Whether the same ordering holds on hardware requires
+  additional hardware measurements; absolute fidelities will also differ
+  with device-specific noise.
 - Largest patch measured is 152 qubits. Whether the observed gap persists
-  or widens at larger N requires additional measurements.
+  at larger N requires additional measurements.
 - Shot counts (1000/sweep point) leave ±0.01--0.02 statistical wobble in
   fidelity; diameter and SWAP counts are exact.

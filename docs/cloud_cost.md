@@ -56,8 +56,8 @@ Sensitivity to the fixed-overhead share `s` of per-shot time
 | 0.99 (overhead dominates) | 1.01x |
 
 Reading: the more of each shot is fixed overhead, the less geometry
-moves the bill. With realistic overhead (s ≈ 0.9+), the 1.9x depth
-ratio shrinks toward ~1.1x.
+moves the bill. For illustrative modeled overhead shares of 0.9 and
+above, the 1.9x depth ratio approaches ~1.1x.
 
 **Note: the first three rows below compare chips of different size
 (5 / 127 / 20 qubits) — do not read them as a geometry ranking.**
@@ -80,6 +80,7 @@ deeper circuit bills longer *and* one in five shots is discarded.
 - This is a model over simulated depths, not a measured cloud bill.
 - The depth ratio is an upper bound on relative cost; measured per-shot
   overhead makes the true ratio much smaller.
-- Real device gate times, parallelism, and pricing tiers vary; relative
-  ordering is more robust than absolute dollars.
+- Real device gate times, parallelism, and pricing tiers vary. Absolute
+  cost is not established by this model; actual cost depends on provider
+  billing, device timing, parallelism, calibration, and pricing.
 - Prices change; re-check before citing.

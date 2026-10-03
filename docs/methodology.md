@@ -50,10 +50,9 @@ spot-check does not show the model universally reproduces IBM hardware.
 - The benchmark numbers come from Qiskit Aer simulation
   (AerSimulator, statevector/stabilizer methods), except the single
   t-shape hardware spot-check on `ibm_fez` (`docs/real_hardware.md`).
-  Nothing else was run on a QPU.
-  Noise is a simulated depolarizing + readout model, not a real device's
-  correlated noise; relative ordering across topologies should hold, but
-  absolute fidelities will differ on hardware.
+  Simulated noise is a depolarizing + readout model, not a real device's
+  correlated noise. Whether the same ordering holds on hardware requires
+  additional measurements; absolute fidelities will also differ.
 - Post-selection discards data instead of correcting it; it does not scale
   to large computations, but it fairly compares geometries' error burden.
 - Timing: the syndrome ancilla is measured once, after routing completes.

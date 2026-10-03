@@ -89,9 +89,10 @@ heavy-hex-21 row above, the scaling table, and the seed sweep.
 ## Noise
 
 Depolarizing errors (single-qubit p=0.001, two-qubit p=0.01) plus readout
-error (p=0.02), applied in AerSimulator. The same model is used for every
-case, so the comparisons are fair; absolute fidelities would differ on real
-hardware with correlated noise.
+error (p=0.02), applied in AerSimulator. The same model is applied across
+the simulated cases, providing a controlled comparison under this noise
+model; absolute fidelities would differ on real hardware with correlated
+noise.
 
 ## Protection
 
