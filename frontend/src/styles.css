@@ -302,6 +302,20 @@ table.data tbody tr:hover { background: var(--teal-dim); }
 .bar-fill { height: 100%; border-radius: 1px; }
 .bar-val { width: 52px; text-align: right; font-family: var(--font-mono); font-size: 14px; font-variant-numeric: tabular-nums; }
 
+.doi-banner {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: var(--amber-dim);
+  border: 1px solid var(--amber);
+  border-left: 4px solid var(--amber);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  margin: 12px 0 0;
+  font-size: 15px;
+}
+.doi-banner a { color: var(--ink); font-weight: 600; }
+
 /* ---------- misc ---------- */
 .muted { color: var(--ink-soft); font-size: 14.5px; }
 .small { font-size: 14px; }

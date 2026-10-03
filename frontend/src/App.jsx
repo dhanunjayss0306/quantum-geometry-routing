@@ -639,6 +639,17 @@ export default function App() {
         Which coupling-graph geometry keeps a worst-case Bell-state route short?
       </div>
 
+      <div className="doi-banner" role="status">
+        <span aria-hidden="true">🎓</span>
+        <span>
+          <strong>Published:</strong> our dataset is now a permanent, citable
+          academic record —{" "}
+          <a href="https://doi.org/10.5281/zenodo.23123273">
+            doi.org/10.5281/zenodo.23123273
+          </a>
+        </span>
+      </div>
+
       <nav className="tabs" aria-label="Views">
         {TABS.map(([key, label]) => (
           <button
