@@ -77,6 +77,7 @@ export const api = {
   topologies: () => get("/api/topologies"),
   results: () => get("/api/results"),
   scaling: () => get("/api/scaling"),
+  hardware: () => get("/api/hardware"),
   runExperiment: (topology, condition, shots = 2000, seed = 42) =>
     post("/api/experiments/run", { topology, condition, shots, seed }),
   runAll: (shots = 2000, seed = 42) =>

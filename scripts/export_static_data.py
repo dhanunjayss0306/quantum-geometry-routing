@@ -16,6 +16,7 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 
 from backend.api.topologies import list_results, list_scaling, list_topologies
+from backend.api.hardware import get_hardware_run
 
 
 def main():
@@ -25,6 +26,7 @@ def main():
         "topologies.json": list_topologies(),
         "results.json": list_results(),
         "scaling.json": list_scaling(),
+        "hardware.json": get_hardware_run(),
     }
     for name, payload in payloads.items():
         path = os.path.join(out_dir, name)

@@ -9,7 +9,7 @@ routes together. Run with:
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.api import experiments, health, topologies
+from backend.api import experiments, hardware, health, topologies
 
 app = FastAPI(
     title="Quantum Geometry Routing API",
@@ -27,4 +27,5 @@ app.add_middleware(
 
 app.include_router(health.router)
 app.include_router(topologies.router)
+app.include_router(hardware.router)
 app.include_router(experiments.router)

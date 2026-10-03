@@ -1,0 +1,88 @@
+{
+  "backend": "ibm_fez",
+  "job_id": "db0e7hal7guc73cgblgg",
+  "submitted_utc": "2026-10-03T11:15:15.136787+00:00",
+  "shots_per_circuit": 2000,
+  "topology": "t-shape-5q",
+  "bell_pair": [
+    0,
+    4
+  ],
+  "graph_distance": 3,
+  "transpiled_depth": {
+    "ZZ": 13,
+    "XX": 13,
+    "YY": 13
+  },
+  "transpiled_two_qubit_depth": {
+    "ZZ": 4,
+    "XX": 4,
+    "YY": 4
+  },
+  "transpiled_ops": {
+    "ZZ": {
+      "sx": 13,
+      "rz": 11,
+      "cz": 7,
+      "measure": 2,
+      "barrier": 1
+    },
+    "XX": {
+      "sx": 13,
+      "rz": 11,
+      "cz": 7,
+      "measure": 2,
+      "barrier": 1
+    },
+    "YY": {
+      "sx": 14,
+      "rz": 11,
+      "cz": 7,
+      "measure": 2,
+      "barrier": 1
+    }
+  },
+  "final_layout_virt_to_phys": [
+    3,
+    16,
+    2,
+    5,
+    4
+  ],
+  "t_shape_physical_qubits": [
+    16,
+    3,
+    2,
+    4,
+    5
+  ],
+  "completed_utc": "2026-10-03T11:16:17.957557+00:00",
+  "job_status": "DONE",
+  "counts": {
+    "ZZ": {
+      "11": 927,
+      "00": 970,
+      "01": 58,
+      "10": 45
+    },
+    "XX": {
+      "11": 977,
+      "00": 944,
+      "01": 50,
+      "10": 29
+    },
+    "YY": {
+      "10": 962,
+      "01": 904,
+      "00": 50,
+      "11": 84
+    }
+  },
+  "correlators": {
+    "XX": 0.921,
+    "YY": -0.866,
+    "ZZ": 0.897
+  },
+  "fidelity_phi_plus": 0.921,
+  "screenshot": "/images/ibm_fez_job.png"
+}

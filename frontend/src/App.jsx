@@ -145,21 +145,76 @@ const TABS = [
   ["run", "Run"],
 ];
 
+/** Real-hardware validation panel: the t-shape case run on ibm_fez. */
+function HardwarePanel({ hw, simNoisyF }) {
+  if (!hw) return null;
+  const corr = hw.correlators || {};
+  const depth = hw.transpiled_depth || {};
+  const d2 = hw.transpiled_two_qubit_depth || {};
+  return (
+    <div className="panel" style={{ borderLeft: "4px solid #0e7c8c" }}>
+      <h2>Real hardware run <span className="tag req">ibm_fez</span></h2>
+      <p className="sub">
+        The t-shape Bell-routing case ran on a real 156-qubit IBM Heron QPU
+        (not a simulator) to validate the noise model.
+      </p>
+      <div className="metric-strip" role="region" aria-label="Hardware vs simulation">
+        <div className="metric-cell">
+          <span className="k">Hardware fidelity</span>
+          <span className="v" style={{ fontSize: 28 }}>{Number(hw.fidelity_phi_plus).toFixed(3)}</span>
+        </div>
+        <div className="metric-cell">
+          <span className="k">Simulated noisy fidelity</span>
+          <span className="v" style={{ fontSize: 28 }}>
+            {simNoisyF != null ? simNoisyF.toFixed(4) : "n/a"}
+          </span>
+        </div>
+        <div className="metric-cell">
+          <span className="k">Correlators</span>
+          <span className="v mono" style={{ fontSize: 15 }}>
+            XX {Number(corr.XX).toFixed(3)} · YY {Number(corr.YY).toFixed(3)} · ZZ {Number(corr.ZZ).toFixed(3)}
+          </span>
+        </div>
+      </div>
+      <ul className="small" style={{ paddingLeft: 20, margin: "12px 0" }}>
+        <li><span className="mono">job {hw.job_id}</span> — status {hw.job_status}, {hw.shots_per_circuit} shots × XX/YY/ZZ</li>
+        <li>Submitted {hw.submitted_utc} · completed {hw.completed_utc}</li>
+        <li>Bell pair on farthest qubits ({(hw.bell_pair || []).join(", ")}, {hw.graph_distance} hops); physical qubits [{(hw.t_shape_physical_qubits || []).join(", ")}]</li>
+        <li>Transpiled depth {depth.ZZ} (two-qubit depth {d2.ZZ}) per correlator circuit</li>
+      </ul>
+      {hw.screenshot && (
+        <figure style={{ margin: "12px 0 0" }}>
+          <img
+            src={hw.screenshot}
+            alt="IBM Quantum Platform job page showing the completed ibm_fez run"
+            style={{ maxWidth: "100%", border: "1px solid var(--rule-strong)", borderRadius: 6 }}
+          />
+          <figcaption className="muted small">
+            Screenshot: the completed job on the IBM Quantum Platform, matching the record above.
+          </figcaption>
+        </figure>
+      )}
+    </div>
+  );
+}
+
 export default function App() {
   const [tab, setTab] = React.useState("dashboard");
   const [topologies, setTopologies] = React.useState([]);
   const [results, setResults] = React.useState([]);
   const [scaling, setScaling] = React.useState([]);
+  const [hardware, setHardware] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
   const [staticMode, setStaticMode] = React.useState(false);
   const [error, setError] = React.useState(null);
 
   React.useEffect(() => {
-    Promise.all([api.topologies(), api.results(), api.scaling()])
-      .then(([t, r, s]) => {
+    Promise.all([api.topologies(), api.results(), api.scaling(), api.hardware().catch(() => null)])
+      .then(([t, r, s, h]) => {
         setTopologies(t);
         setResults(r);
         setScaling(s);
+        setHardware(h);
         setStaticMode(isStaticMode());
       })
       .catch((e) => setError(e.message))
@@ -218,6 +273,10 @@ export default function App() {
         <main>
           <HeadlineGroups results={results} scaling={scaling} />
           <FidelityBars results={results} />
+          <HardwarePanel
+            hw={hardware}
+            simNoisyF={(findRow(results, "t-shape", "noisy") || {}).fidelity}
+          />
           <div className="panel">
             <h2>9-case experiment matrix</h2>
             <p className="sub">
@@ -267,7 +326,7 @@ export default function App() {
 
       <footer className="site">
         <span>Quantum Geometry Routing</span>
-        <span>Simulation-based research prototype</span>
+        <span>Simulation benchmark + one real-QPU validation run</span>
         <a href="https://github.com/dhanunjayss0306/quantum-geometry-routing">GitHub repository</a>
         <span>Docs: README, docs/methodology.md</span>
       </footer>
