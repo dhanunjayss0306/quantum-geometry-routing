@@ -84,5 +84,6 @@
     "ZZ": 0.897
   },
   "fidelity_phi_plus": 0.921,
-  "screenshot": "/images/ibm_fez_job.png"
+  "screenshot": "/images/ibm_fez_job.png",
+  "fidelity_stderr": 0.004
 }

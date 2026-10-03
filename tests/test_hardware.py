@@ -12,6 +12,9 @@ def test_hardware_run_serves_recorded_job():
     assert data["job_id"] == "db0e7hal7guc73cgblgg"
     assert data["job_status"] == "DONE"
     assert abs(data["fidelity_phi_plus"] - 0.921) < 1e-9
+    # 1-sigma standard error from correlator shot noise: 0.004 (stored
+    # fidelity value itself is unchanged).
+    assert abs(data["fidelity_stderr"] - 0.004) < 1e-9
     assert data["shots_per_circuit"] == 2000
     assert data["screenshot"] == "/images/ibm_fez_job.png"
     assert os.path.exists(

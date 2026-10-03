@@ -156,12 +156,18 @@ function HardwarePanel({ hw, simNoisyF }) {
       <h2>Real hardware run <span className="tag req">ibm_fez</span></h2>
       <p className="sub">
         The t-shape Bell-routing case ran on a real 156-qubit IBM Heron QPU
-        (not a simulator) to validate the noise model.
+        (not a simulator) to spot-check the noise model against real
+        hardware — one small case.
       </p>
       <div className="metric-strip" role="region" aria-label="Hardware vs simulation">
         <div className="metric-cell">
           <span className="k">Hardware fidelity</span>
-          <span className="v" style={{ fontSize: 28 }}>{Number(hw.fidelity_phi_plus).toFixed(3)}</span>
+          <span className="v" style={{ fontSize: 28 }}>
+            {Number(hw.fidelity_phi_plus).toFixed(3)}
+            {hw.fidelity_stderr != null && (
+              <span style={{ fontSize: 16 }}> ± {Number(hw.fidelity_stderr).toFixed(3)}</span>
+            )}
+          </span>
         </div>
         <div className="metric-cell">
           <span className="k">Simulated noisy fidelity</span>
@@ -181,6 +187,7 @@ function HardwarePanel({ hw, simNoisyF }) {
         <li>Submitted {hw.submitted_utc} · completed {hw.completed_utc}</li>
         <li>Bell pair on farthest qubits ({(hw.bell_pair || []).join(", ")}, {hw.graph_distance} hops); physical qubits [{(hw.t_shape_physical_qubits || []).join(", ")}]</li>
         <li>Transpiled depth {depth.ZZ} (two-qubit depth {d2.ZZ}) per correlator circuit</li>
+        <li>Consistent with the simulated noisy value within shot noise for this one case — a spot-check, not proof the noise model fits other chips or topologies.</li>
       </ul>
       {hw.screenshot && (
         <figure style={{ margin: "12px 0 0" }}>

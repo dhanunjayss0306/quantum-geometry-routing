@@ -39,9 +39,8 @@ fidelity F = (1 + ⟨XX⟩ − ⟨YY⟩ + ⟨ZZ⟩)/4. Details: `docs/methodolog
 
 - **t-shape** (5 qubits): 2016-era reference layout.
 - **heavy-hex-127** (127 qubits): 127-qubit IBM Eagle-style coupling map
-  (static edge list derived from the Qiskit FakeSherbrooke fake backend),
-  loaded from a static edge list extracted from FakeSherbrooke. This is the
-  IBM-style row of the matrix, per the Track 4 spec.
+  (static edge list derived from the Qiskit FakeSherbrooke fake backend).
+  This is the IBM-style row of the matrix, per the Track 4 spec.
 - **hyperbolic-20** (20 qubits): finite patch of the `{7,3}` tessellation,
   built by reflecting the fundamental heptagon across geodesic edges in the
   Poincaré disk. A proposed/simulated coupling topology, not fabricated
@@ -169,12 +168,20 @@ Sizes are near-matched, not identical; exact counts are shown.
   across seeds).
 - Coupling-graph features suggested by the data: `docs/recommendation.md`.
 
+## Real hardware
+
+One t-shape case ran on IBM's `ibm_fez` QPU (job `db0e7hal7guc73cgblgg`,
+2000 shots per correlator): F = 0.921 ± 0.004, consistent with the
+simulated noisy value 0.9203 within shot noise for this one case. Full
+record in `docs/real_hardware.md`. All 127-qubit and hyperbolic results
+are simulation.
+
 ## Limitations
 
 - All benchmark results are Aer simulation with an idealized depolarizing +
   readout-error noise model, except one real-hardware t-shape validation run
-  on `ibm_fez` (F = 0.921, within 0.001 of the simulated noisy value;
-  see `docs/real_hardware.md`).
+  on `ibm_fez` (F = 0.921 ± 0.004, consistent with the simulated 0.9203
+  within shot noise for this one case; see `docs/real_hardware.md`).
 - The `{7,3}` patch is a proposed coupling topology, not fabricated
   hardware; manufacturing feasibility is not addressed.
 - Post-selection is error detection, not correction: it discards data, is
@@ -197,7 +204,7 @@ python3 scripts/cloud_cost.py            # QPU cloud-cost model -> results/table
 python3 scripts/export_static_data.py    # static snapshot for the frontend -> frontend/public/data/
 python3 scripts/seed_sweep.py            # seed robustness -> results/tables/seed_sweep.csv
 python3 scripts/render_3d_figure.py      # static 3D figure -> results/figures/
-python3 -m pytest tests/ -q              # 38 tests
+python3 -m pytest tests/ -q              # 43 tests
 
 # API + dashboard (two terminals):
 uvicorn backend.main:app --port 8765       # http://localhost:8765/docs

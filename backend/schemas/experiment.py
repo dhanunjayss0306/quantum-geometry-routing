@@ -1,6 +1,6 @@
 """API schemas: what the frontend may send, and what it gets back."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from backend.config import (
     ALLOWED_CONDITIONS,
@@ -46,8 +46,7 @@ class ExperimentResult(BaseModel):
     seed: int
     required: bool = True
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class TopologyInfo(BaseModel):

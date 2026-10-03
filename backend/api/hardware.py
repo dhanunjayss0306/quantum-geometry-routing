@@ -24,4 +24,9 @@ def get_hardware_run():
     with open(HARDWARE_FILE) as f:
         data = json.load(f)
     data["screenshot"] = "/images/ibm_fez_job.png"
+    # 1-sigma standard error of F from correlator shot noise:
+    # F = (1 + XX - YY + ZZ)/4, se(c) = sqrt((1 - c^2) / shots).
+    shots = data["shots_per_circuit"]
+    var = sum((1 - c ** 2) / shots for c in data["correlators"].values())
+    data["fidelity_stderr"] = round(0.25 * var ** 0.5, 3)
     return data
