@@ -229,30 +229,31 @@ function HardwarePage({ hw, simNoisyF }) {
       <div className="panel" style={{ borderLeft: "4px solid #0e7c8c" }}>
         <h2>Real hardware run <span className="tag req">ibm_fez</span></h2>
         <p className="sub">
-          The t-shape Bell-routing case ran on a real 156-qubit IBM Heron r2
-          QPU (not a simulator) to spot-check the noise model against real
-          hardware — one small case.
+          We ran our smallest test case on a real quantum computer — IBM's{" "}
+          <span className="mono">ibm_fez</span> chip — to check whether our
+          simulator's noise behaves like the real thing. Just this one
+          small case.
         </p>
         <div className="metric-strip" role="region" aria-label="Hardware vs simulation">
           <div className="metric-cell">
-            <span className="k">Hardware fidelity</span>
+            <span className="k">Real chip score</span>
             <span className="v" style={{ fontSize: 28 }}>
               {Number(hw.fidelity_phi_plus).toFixed(3)}
               {hw.fidelity_stderr != null && (
                 <span style={{ fontSize: 16 }}> ± {Number(hw.fidelity_stderr).toFixed(3)}</span>
               )}
             </span>
-            <span className="u">± is 1σ shot noise</span>
+            <span className="u">give or take 0.004 (shot noise)</span>
           </div>
           <div className="metric-cell">
-            <span className="k">Simulated noisy fidelity</span>
+            <span className="k">Simulator prediction</span>
             <span className="v" style={{ fontSize: 28 }}>
               {simNoisyF != null ? simNoisyF.toFixed(4) : "n/a"}
             </span>
-            <span className="u">Aer, same noise model</span>
+            <span className="u">same noise model, Aer</span>
           </div>
           <div className="metric-cell">
-            <span className="k">Correlators</span>
+            <span className="k">Measurements</span>
             <span className="v mono" style={{ fontSize: 15 }}>
               XX {Number(corr.XX).toFixed(3)} · YY {Number(corr.YY).toFixed(3)} · ZZ {Number(corr.ZZ).toFixed(3)}
             </span>
@@ -260,39 +261,38 @@ function HardwarePage({ hw, simNoisyF }) {
           </div>
         </div>
         <p className="small" style={{ marginTop: 12 }}>
-          Consistent with the simulated noisy value within shot noise for
-          this one case — a spot-check, not proof the noise model fits other
-          chips or topologies.
+          The real chip scored 0.921, the simulator predicted 0.9203 —
+          close enough to agree. But this is one test on 5 qubits. It
+          doesn't prove the simulator matches real hardware everywhere.
         </p>
       </div>
 
       <div className="panel">
-        <h2>Provenance</h2>
+        <h2>The details</h2>
         <ul className="small" style={{ paddingLeft: 20, margin: "12px 0" }}>
-          <li>Backend: <span className="mono">{hw.backend}</span> — 156-qubit IBM Heron r2</li>
-          <li>Job <span className="mono">{hw.job_id}</span> — status {hw.job_status}</li>
-          <li>Submitted {hw.submitted_utc} · completed {hw.completed_utc}</li>
-          <li>{hw.shots_per_circuit} shots × XX/YY/ZZ correlator circuits (6000 total)</li>
-          <li>Bell pair on farthest qubits ({(hw.bell_pair || []).join(", ")}, {hw.graph_distance} hops)</li>
+          <li>Chip: <span className="mono">{hw.backend}</span> — IBM's 156-qubit Heron processor</li>
+          <li>Job <span className="mono">{hw.job_id}</span> — finished successfully</li>
+          <li>Sent {hw.submitted_utc} · done {hw.completed_utc}</li>
+          <li>{hw.shots_per_circuit} shots for each of the three measurements (6000 total)</li>
+          <li>Bell pair between the two most distant qubits ({(hw.bell_pair || []).join(", ")}), {hw.graph_distance} hops apart</li>
         </ul>
       </div>
 
       <div className="panel">
-        <h2>What actually ran on the chip</h2>
+        <h2>Not exactly the same circuit</h2>
         <p className="sub">
-          The hardware circuit is not a copy of the simulated benchmark
-          circuit — it is the t-shape case transpiled for the real device:
+          On the real chip, the circuit looked a little different from our
+          idealized simulation:
         </p>
         <ul className="small" style={{ paddingLeft: 20, margin: "12px 0" }}>
-          <li>Physical qubits [{(hw.t_shape_physical_qubits || []).join(", ")}]</li>
-          <li>{cz != null ? `${cz} CZ gates` : "7 CZ gates"} per correlator circuit, two-qubit depth {d2.ZZ}</li>
-          <li>The simulated t-shape benchmark uses the abstract topology/routing model instead.</li>
+          <li>It ran on physical qubits [{(hw.t_shape_physical_qubits || []).join(", ")}]</li>
+          <li>{cz != null ? `${cz} CZ gates` : "7 CZ gates"} per measurement, at two-qubit depth {d2.ZZ}</li>
         </ul>
         <p className="small">
-          So this run is a <em>validation spot-check</em> of the noise model
-          on one small case — not an exact reproduction of the simulated
-          pipeline, and not validation of the 127-qubit or hyperbolic
-          results (those are simulation only).
+          That's normal — a real chip needs its own version of the circuit.
+          It just means this was a sanity check of our noise model, not a
+          rerun of the whole simulation. The 127-qubit and hyperbolic
+          numbers are still simulation only.
         </p>
       </div>
 
