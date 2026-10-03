@@ -2,8 +2,9 @@
 
 **Track 4: Geometry-Aware Quantum Cloud Challenge** (IBM Qiskit Fall Fest 2026)
 
-All results below are from Qiskit Aer simulation (AerSimulator). Nothing was
-run on a QPU.
+All results below are from Qiskit Aer simulation (AerSimulator), except one
+real-hardware t-shape validation run on IBM's `ibm_fez` QPU
+(see `docs/real_hardware.md`).
 
 ```
 topology -> farthest pair -> transpiler SWAPs -> two-qubit gate exposure -> noisy fidelity
@@ -170,8 +171,10 @@ Sizes are near-matched, not identical; exact counts are shown.
 
 ## Limitations
 
-- All results are Aer simulation; nothing ran on a QPU, and the noise model
-  is idealized depolarizing + readout error.
+- All benchmark results are Aer simulation with an idealized depolarizing +
+  readout-error noise model, except one real-hardware t-shape validation run
+  on `ibm_fez` (F = 0.921, within 0.001 of the simulated noisy value;
+  see `docs/real_hardware.md`).
 - The `{7,3}` patch is a proposed coupling topology, not fabricated
   hardware; manufacturing feasibility is not addressed.
 - Post-selection is error detection, not correction: it discards data, is
