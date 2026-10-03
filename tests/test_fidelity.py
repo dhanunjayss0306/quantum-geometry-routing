@@ -62,7 +62,7 @@ def test_protected_ideal_fidelity_one_and_yield_one():
 
 
 def test_protected_beats_noisy_but_below_one():
-    """Honest protection: helps under noise, but cannot reach perfection."""
+    """Protection helps under noise, but cannot reach perfection."""
     noisy = run_case(HeavyHexTopology(), "noisy", shots=1000, seed=42)
     prot = run_case(HeavyHexTopology(), "protected", shots=1000, seed=42)
     assert prot["fidelity"] > noisy["fidelity"] + 0.01

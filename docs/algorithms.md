@@ -6,12 +6,15 @@ Math: H|0> = (|0>+|1>)/sqrt(2); CX entangles -> (|00>+|11>)/sqrt(2).
 
 ## 2. Topology construction
 Input: size parameters. Output: edge list (undirected).
-- Star: hub 0 connected to leaves 1..4.
+- T-shape: 5-qubit reference (edges (0,1),(1,2),(1,3),(3,4)).
 - Heavy-hex: honeycomb via `networkx.hexagonal_lattice_graph`, then
   subdivide every edge with a new node (this is exactly IBM's heavy-hex).
-- Hyperbolic: layered expansion -- each node grows 2 children per layer
-  (sizes 1,3,6,12), plus face edges stitching neighboring branches into
-  cycles. Exponential growth mimics hyperbolic {7,3} tilings.
+  `Eagle127Topology` instead loads the real 127-qubit Eagle coupling map
+  from a static edge list (extracted once from FakeSherbrooke).
+- Hyperbolic: a finite patch of the `{7,3}` tessellation, built by
+  reflecting the fundamental heptagon across its geodesic edges in the
+  Poincare disk. Every interior vertex has degree 3, every face is a
+  7-cycle. A proposed/simulated coupling topology, not hardware.
 
 ## 3. Quantum routing (transpilation)
 Input: logical circuit + coupling map. Output: physical circuit.
@@ -39,7 +42,7 @@ Input: counts from XX, YY, ZZ circuits. Output: F in [0,1].
 <PP> = (N_agree - N_disagree)/N. Then F = (1 + <XX> - <YY> + <ZZ>)/4.
 The YY sign is negative because |Phi+> anti-correlates in the Y basis.
 
-## 8. Syndrome post-selection (ancilla-based, honest)
+## 8. Syndrome post-selection (ancilla-based)
 Input: counts from protected XX/YY/ZZ circuits (4-bit outcomes:
 syn_xx syn_zz d1 d0). Output: fidelity from data bits, yield.
 After routing, one ancilla measures the Bell stabilizers ZZ then XX via

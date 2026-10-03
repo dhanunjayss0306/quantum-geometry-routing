@@ -58,7 +58,7 @@ export default function App() {
     <div className="app">
       <header>
         <h1>Quantum Geometry Routing</h1>
-        <p>Which road-map should future quantum clouds use? Bell-state routing across three chip topologies.</p>
+        <p>Bell-state routing across chip topologies, simulated with Qiskit Aer. Compare routing cost and fidelity by coupling-graph geometry.</p>
         <nav>
           {["dashboard", "topologies", "3d", "run"].map((t) => (
             <button

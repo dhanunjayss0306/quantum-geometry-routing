@@ -1,6 +1,6 @@
-"""TONIGHT'S TIEBREAKER TEST.
+"""Tiebreaker test: route a Bell state across the 5-qubit star.
 
-Question: can we build a Bell state between two DISTANT qubits
+Question: can we build a Bell state between two distant qubits
 (leaves 1 and 3 of the 5-qubit star) and route it through the hub?
 
 Expected: the transpiler inserts SWAPs (the detour), the ideal

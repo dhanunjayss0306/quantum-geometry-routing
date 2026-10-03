@@ -26,11 +26,17 @@ qubits on a quantum cloud processor?
 - Fixed seeds + saved configs make every number reproducible.
 - Idle-qubit stripping keeps simulation exact (2^8 instead of 2^35
   amplitudes) without changing any measurement result.
-- Post-selection is honest error *detection*: we report both the fidelity
-  gained and the shots discarded (the trade-off plot).
+- Post-selection is error *detection*, not correction: we report both the
+  fidelity gained and the shots discarded (the trade-off plot).
 
 ## Limitations
-- Simulated noise, not a real QPU (fake-backend noise is future work).
+- Every number in this repo comes from Qiskit Aer simulation
+  (AerSimulator, statevector/stabilizer methods). Nothing was run on a QPU.
+  Noise is a simulated depolarizing + readout model, not a real device's
+  correlated noise; relative ordering across topologies should hold, but
+  absolute fidelities will differ on hardware.
 - Post-selection discards data instead of correcting it; it does not scale
   to large computations, but it fairly compares geometries' error burden.
-- The hyperbolic patch is inspired by {7,3} tilings, not a fabricated chip.
+- The hyperbolic patch is a finite `{7,3}` tessellation patch
+  (built by Poincare-disk reflections), a proposed/simulated coupling
+  topology -- not a fabricated chip.

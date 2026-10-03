@@ -7,11 +7,11 @@ measurements into SEPARATE classical bits. Shots where either syndrome reads
 1 are discarded; the XX/YY/ZZ correlators are then computed from the DATA
 qubits' bits only.
 
-Why this is honest (and the old version was not): the old code filtered shots
-on the very same bits it then scored, forcing fidelity to 1.0 by
+Why selection and scoring use disjoint bits: an earlier version filtered
+shots on the very same bits it then scored, forcing fidelity to 1.0 by
 construction -- even pure noise "passed". Here selection uses ONLY ancilla
-bits, which are never scored. Selection and scoring are independent, so a
-random input can no longer fake a perfect fidelity.
+bits, which are never scored, so a random input can no longer fake a
+perfect fidelity.
 
 The ancilla must sit next to the data qubits (CNOTs need a road). We pick the
 physical qubit minimizing the total SWAP distance to the Bell pair's final
@@ -48,7 +48,7 @@ def create_protected_bell_circuit() -> QuantumCircuit:
 
     The whole 3-qubit circuit is routed by the transpiler, which places the
     ancilla and inserts whatever SWAPs the coupling map demands. That is
-    the honest protection cost: we count it instead of hand-placing qubits.
+    the measured protection cost: we count it instead of hand-placing qubits.
     """
     qc = QuantumCircuit(3, 4)
     # Bell pair on qubits 0 and 1.

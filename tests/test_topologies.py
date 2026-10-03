@@ -49,6 +49,8 @@ def test_eagle_127():
     assert g.number_of_edges() == 144
     assert max(dict(g.degree()).values()) == 3
     assert nx.diameter(g) == 26
+    # node ids must be contiguous 0..126 (frontend indexes positions by id)
+    assert set(g.nodes()) == set(range(127))
 
 
 def _check_73(t):

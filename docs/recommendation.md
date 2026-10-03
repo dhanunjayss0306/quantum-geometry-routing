@@ -1,9 +1,11 @@
-# Architectural recommendation: what the next quantum cloud chip should look like
+# Architectural recommendation: coupling-graph features worth testing next
 
-**Bottom line:** for cloud-scale entanglement, the coupling graph's *diameter
-scaling* is the single number that matters. We measured three families from
-~20 to 152 qubits. The hyperbolic `{7,3}` patch wins at every size, and the
-industry-standard heavy-hex loses even to a plain square grid.
+**Bottom line:** for the workload we tested -- routing a Bell state between
+a chip's two farthest qubits -- the coupling graph's diameter scaling is the
+strongest predictor of cost. We measured three families from ~20 to 152
+qubits. The hyperbolic `{7,3}` patch had the smallest diameter at every
+measured size, and the industry-standard heavy-hex had a larger diameter
+than even a plain square grid at matched sizes.
 
 ## The evidence (from `results/tables/scaling.csv`)
 
@@ -20,8 +22,9 @@ SWAPs, and noisy fidelity falls with SWAP count:
 
 - heavy-hex-127: 25 SWAPs → fidelity **0.814**
 - hyperbolic-152: 15 SWAPs → fidelity **0.868**
-- Syndrome protection on heavy-hex-35: fidelity 0.864 → 0.920, at a cost of
-  +1 SWAP, +4 CX, +14 two-qubit depth and 15% of shots discarded.
+- Syndrome protection on heavy-hex-21 (9-case matrix): fidelity 0.894 →
+  0.921, at a cost of +1 SWAP, +4 CX, +7 two-qubit depth, and 12% of shots
+  discarded (yield 0.881).
 
 ## Recommended coupling-graph features
 
@@ -45,23 +48,24 @@ SWAPs, and noisy fidelity falls with SWAP count:
    Measured: at N≈60, `{7,3}` diameter 11 vs heavy-hex 18.
 
 5. **Budget for error detection, or avoid needing it.** Syndrome protection
-   (ancilla ZZ/XX parity checks) recovers ~0.06 fidelity on heavy-hex but
-   costs +4 CX, +14 depth and 15% yield. A topology that needs 10 fewer
-   SWAPs buys more fidelity than protection ever recovers. Prefer geometry
-   over band-aids; reserve ancilla checks for the longest routes.
+   (ancilla ZZ/XX parity checks) recovers ~0.03 fidelity on heavy-hex-21 but
+   costs +4 CX, +7 two-qubit depth and 12% yield. A topology that needs 3
+   fewer SWAPs buys more fidelity than protection recovers here. Prefer
+   reducing the route length over adding checks; reserve ancilla checks for
+   the longest routes.
 
 6. **Forward-looking: ~N/log N long-range shortcut couplers.** Our data
    covers planar graphs only, but the mechanism is clear -- diameter is set
    by the longest shortest path, and a few non-planar shortcuts collapse it
    (small-world effect). Worth simulating next; not yet measured.
 
-## Honest caveats
+## Caveats
 
 - Noise is simulated depolarizing + readout error, not a real device's
   correlated noise. Relative ordering should hold; absolute fidelities will
   differ on hardware.
-- Largest patch measured is 152 qubits; the log-vs-√N separation widens
-  with N, so these numbers *understate* the hyperbolic advantage at 1000+ q.
+- Largest patch measured is 152 qubits; the measured trends suggest the
+  gap would widen at larger N, but that is extrapolation, not measurement.
 - A `{7,3}` patch is a planar graph, so it is manufacturable as a coupler
   layout in principle -- but no foundry builds heptagonal coupler graphs
   today, and degree-3 vertices at non-standard angles need process work.

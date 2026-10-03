@@ -1,8 +1,8 @@
-"""Compare the three topologies head-to-head (routing only, ideal simulation).
+"""Compare the headline topologies head-to-head (routing only, ideal simulation).
 
 For each topology:
   * report graph stats (qubits, diameter = longest shortest path),
-  * route a Bell state between the two FARTHEST-APART qubits,
+  * route a Bell state between the two farthest-apart qubits,
   * count SWAPs / CX / depth,
   * ideal-simulate and check the Bell state survived.
 
@@ -18,39 +18,27 @@ import sys
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 
-import networkx as nx
 from qiskit_aer import AerSimulator
 
 from quantum.circuits.bell_state import create_bell_measurement_circuit
-from quantum.topologies.star import StarTopology
-from quantum.topologies.heavy_hex import HeavyHexTopology
-from quantum.topologies.hyperbolic import HyperbolicTopology
+from quantum.topologies.tshape import TShapeTopology
+from quantum.topologies.heavy_hex import HeavyHexPatch
+from quantum.topologies.hyperbolic import HyperbolicTiling
 from quantum.routing.transpiler import route_circuit, strip_idle_qubits
 from quantum.routing.swap_analysis import analyze_routing
+from algorithms.experiment_matrix import farthest_pair
 
 SHOTS = 2000
 SEED = 42
 
 
-def farthest_pair(topology):
-    """Two qubits with the longest shortest-path between them."""
-    g = topology.graph()
-    lengths = dict(nx.shortest_path_length(g))
-    nodes = list(g.nodes())
-    a, b = max(
-        ((u, v) for i, u in enumerate(nodes) for v in nodes[i + 1:]),
-        key=lambda p: lengths[p[0]][p[1]],
-    )
-    return a, b, lengths[a][b]
-
-
 def main() -> None:
     sim = AerSimulator(seed_simulator=SEED)
-    print(f"{'topology':<12}{'qubits':<8}{'diameter':<10}"
+    print(f"{'topology':<16}{'qubits':<8}{'diameter':<10}"
           f"{'Bell pair':<12}{'SWAPs':<7}{'CX':<5}{'depth':<7}{'fidelity~':<10}")
-    print("-" * 71)
-    for topology in [StarTopology(), HeavyHexTopology(), HyperbolicTopology()]:
-        g = topology.graph()
+    print("-" * 75)
+    for topology in [TShapeTopology(), HeavyHexPatch(1, 2),
+                     HyperbolicTiling(17)]:
         a, b, dist = farthest_pair(topology)
 
         bell = create_bell_measurement_circuit()
@@ -62,10 +50,10 @@ def main() -> None:
         counts = sim.run(slim, shots=SHOTS).result().get_counts()
         fid = (counts.get("00", 0) + counts.get("11", 0)) / SHOTS
 
-        print(f"{topology.name:<12}{topology.num_qubits():<8}{dist:<10}"
+        print(f"{topology.name:<16}{topology.num_qubits():<8}{dist:<10}"
               f"{f'{a}<->{b}':<12}{m['swap_count']:<7}{m['cx_count']:<5}"
               f"{m['depth']:<7}{fid:<10.4f}")
-    print("-" * 71)
+    print("-" * 75)
     print("diameter = longest shortest path (graph hops). Bell pair routed across it.")
 
 

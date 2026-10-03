@@ -1,7 +1,7 @@
 import React from "react";
 import { api } from "../api/client";
 
-/** One-line plain-English explanation of a result. Judges love this. */
+/** One-line plain-English explanation of a result. */
 function explain(r) {
   const bits = [];
   if (r.swap_count === 0) {
@@ -25,7 +25,7 @@ function explain(r) {
   } else if (r.condition === "noisy") {
     bits.push("under depolarizing + readout noise");
   } else {
-    bits.push("in the ideal noiseless world");
+    bits.push("with no noise");
   }
   return bits.join(", ") + ".";
 }
@@ -35,8 +35,8 @@ const TOPOLOGIES = [
   ["star", "star (2016 variant)"],
   ["heavy-hex-21", "heavy-hex 21q (IBM-style)"],
   ["heavy-hex-35", "heavy-hex 35q (IBM-style)"],
-  ["hyperbolic-20", "hyperbolic {7,3} 20q (future)"],
-  ["hyperbolic-43", "hyperbolic {7,3} 43q (future)"],
+  ["hyperbolic-20", "hyperbolic {7,3} 20q (proposed)"],
+  ["hyperbolic-43", "hyperbolic {7,3} 43q (proposed)"],
 ];
 
 export default function RunExperiment() {

@@ -15,8 +15,8 @@ A quantum *if* statement: flips the target qubit only if the control is 1.
 This is the gate that links two qubits together.
 
 ## 4. Bell state
-Two magic coins, spun in a linked way: each coin alone is completely random,
-but the two always match. Recipe: H on qubit 0, then CNOT(0 -> 1).
+Two qubits in a linked superposition: each qubit alone measures completely
+random, but the two always agree. Recipe: H on qubit 0, then CNOT(0 -> 1).
 |Phi+> = (|00> + |11>)/sqrt(2). The entire quantum core of this project.
 
 ## 5. Measurement / shots
@@ -52,6 +52,5 @@ circuit (see `quantum/fidelity/`).
 
 ## 12. Graphs / NetworkX
 A topology is a graph: vertices = qubits, edges = allowed two-qubit gates.
-`diameter` = longest shortest path = worst-case trip length. Our whole
-comparison is graph theory wearing a quantum costume -- your CS degree
-applies directly.
+`diameter` = longest shortest path = worst-case trip length. Our comparison
+rests on graph theory: vertices = qubits, edges = allowed two-qubit gates.

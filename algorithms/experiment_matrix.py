@@ -1,6 +1,6 @@
-"""The 9-case experiment matrix: the scientific core of the project.
+"""The 9-case experiment matrix.
 
-    3 topologies (star, heavy-hex, hyperbolic)
+    3 topologies (t-shape, heavy-hex-21, hyperbolic-20)
   x 3 conditions (ideal, noisy, noisy+protected)
   = 9 experiments.
 
@@ -9,7 +9,7 @@ qubits (worst-case trip), then report routing cost (SWAPs, CX, depth)
 and Bell-state fidelity. The 'protected' condition adds syndrome
 post-selection on top of noise.
 
-Every case returns a plain dict -- JSON-serializable, no magic.
+Every case returns a plain dict -- JSON-serializable.
 """
 
 import networkx as nx
