@@ -1,0 +1,4 @@
+topology,condition,depth_2q,yield,cost_per_useful_shot_units
+t-shape,protected,7,0.9133,7.66
+heavy-hex-127,protected,26,0.7948,32.71
+hyperbolic-20,protected,9,0.8907,10.1

@@ -190,10 +190,11 @@ python3 scripts/tiebreaker.py            # Bell state routed on the 5-qubit star
 python3 scripts/compare_routing.py       # routing-only comparison (ideal)
 python3 scripts/run_all_cases.py         # 9 required + 3 supplementary -> experiments/results/
 python3 scripts/scaling_sweep.py         # 15 chips, 20->152 qubits -> results/tables/
+python3 scripts/cloud_cost.py            # QPU cloud-cost model -> results/tables/cloud_cost.csv
 python3 scripts/export_static_data.py    # static snapshot for the frontend -> frontend/public/data/
 python3 scripts/seed_sweep.py            # seed robustness -> results/tables/seed_sweep.csv
 python3 scripts/render_3d_figure.py      # static 3D figure -> results/figures/
-python3 -m pytest tests/ -q              # 35 tests
+python3 -m pytest tests/ -q              # 38 tests
 
 # API + dashboard (two terminals):
 uvicorn backend.main:app --port 8765       # http://localhost:8765/docs
