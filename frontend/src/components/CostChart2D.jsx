@@ -41,30 +41,30 @@ export default function CostChart2D({ depthA, depthB, labelA, labelB, shots, pri
         {/* gridlines */}
         {yTicks.map((t, i) => (
           <g key={i}>
-            <line x1={PAD_L} x2={W - PAD_R} y1={y(t)} y2={y(t)} stroke="#232b36" strokeWidth="1" />
-            <text x={PAD_L - 8} y={y(t) + 5} textAnchor="end" fontSize="14" fill="#8b949e" fontFamily="ui-monospace, monospace">
+            <line x1={PAD_L} x2={W - PAD_R} y1={y(t)} y2={y(t)} stroke="#ddd5c4" strokeWidth="1" />
+            <text x={PAD_L - 8} y={y(t) + 5} textAnchor="end" fontSize="14" fill="#1e1b16" fontFamily="ui-monospace, monospace">
               {fmt$(t)}
             </text>
           </g>
         ))}
         {xTicks.map((t) => (
-          <text key={t} x={x(t)} y={H - PAD_B + 22} textAnchor="middle" fontSize="14" fill="#8b949e" fontFamily="ui-monospace, monospace">
+          <text key={t} x={x(t)} y={H - PAD_B + 22} textAnchor="middle" fontSize="14" fill="#1e1b16" fontFamily="ui-monospace, monospace">
             {t}
           </text>
         ))}
-        <text x={(W + PAD_L - PAD_R) / 2} y={H - 6} textAnchor="middle" fontSize="15" fill="#e6edf3">
+        <text x={(W + PAD_L - PAD_R) / 2} y={H - 6} textAnchor="middle" fontSize="15" fill="#1e1b16">
           fixed overhead per shot (µs)
         </text>
         {/* you-are-here marker */}
-        <line x1={hereX} x2={hereX} y1={PAD_T} y2={H - PAD_B} stroke="#f0b429" strokeWidth="1.5" strokeDasharray="5 4" />
-        <text x={hereX} y={PAD_T - 4} textAnchor="middle" fontSize="13" fill="#f0b429" fontFamily="ui-monospace, monospace">
+        <line x1={hereX} x2={hereX} y1={PAD_T} y2={H - PAD_B} stroke="#a85f1d" strokeWidth="1.5" strokeDasharray="5 4" />
+        <text x={hereX} y={PAD_T - 4} textAnchor="middle" fontSize="13" fill="#a85f1d" fontFamily="ui-monospace, monospace">
           your setting
         </text>
-        {/* the two cost lines */}
-        <path d={line(ptsB)} fill="none" stroke="#a85f1d" strokeWidth="3.5" />
+        {/* the two cost lines: A solid, B dashed */}
+        <path d={line(ptsB)} fill="none" stroke="#a85f1d" strokeWidth="3.5" strokeDasharray="8 5" />
         <path d={line(ptsA)} fill="none" stroke="#0e7c8c" strokeWidth="3.5" />
-        <circle cx={hereX} cy={y(cost(tFixed, depthA))} r="6" fill="#0e7c8c" stroke="#0d1117" strokeWidth="2" />
-        <circle cx={hereX} cy={y(cost(tFixed, depthB))} r="6" fill="#a85f1d" stroke="#0d1117" strokeWidth="2" />
+        <circle cx={hereX} cy={y(cost(tFixed, depthA))} r="6" fill="#0e7c8c" stroke="#fffdf8" strokeWidth="2" />
+        <rect x={hereX - 5.5} y={y(cost(tFixed, depthB)) - 5.5} width="11" height="11" fill="#a85f1d" stroke="#fffdf8" strokeWidth="2" />
       </svg>
       <div style={{ display: "flex", gap: 20, marginTop: 8, flexWrap: "wrap", alignItems: "center" }}>
         <span className="mono small">
@@ -72,7 +72,7 @@ export default function CostChart2D({ depthA, depthB, labelA, labelB, shots, pri
           {labelA} — {fmt$(cost(tFixed, depthA))}
         </span>
         <span className="mono small">
-          <span style={{ display: "inline-block", width: 22, height: 4, background: "#a85f1d", marginRight: 8, verticalAlign: "middle", borderRadius: 2 }} />
+          <span style={{ display: "inline-block", width: 22, height: 0, borderTop: "4px dashed #a85f1d", marginRight: 8, verticalAlign: "middle" }} />
           {labelB} — {fmt$(cost(tFixed, depthB))}
         </span>
       </div>

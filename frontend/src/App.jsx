@@ -17,6 +17,26 @@ function findRow(results, topology, condition) {
   );
 }
 
+/** "2026-10-03T11:15:15.136787+00:00" -> "3 Oct 2026, 11:15 UTC". */
+function fmtTime(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d)) return iso;
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getUTCDate()} ${months[d.getUTCMonth()]} ${d.getUTCFullYear()}, ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())} UTC`;
+}
+
+/** Wall-clock between two ISO timestamps, humanized. */
+function fmtDuration(startIso, endIso) {
+  if (!startIso || !endIso) return null;
+  const s = (new Date(endIso) - new Date(startIso)) / 1000;
+  if (!(s >= 0)) return null;
+  if (s < 90) return "about 1 minute";
+  if (s < 3600) return `about ${Math.round(s / 60)} minutes`;
+  return `about ${(s / 3600).toFixed(1)} hours`;
+}
+
 /** E1: two labelled groups, values from data, never hard-coded. */
 function HeadlineGroups({ results, scaling }) {
   const req = results.filter((r) => REQUIRED.includes(r.topology));
@@ -34,8 +54,7 @@ function HeadlineGroups({ results, scaling }) {
   });
 
   const hyp127 = (scaling || []).find((s) => s.topology === "hyperbolic-127");
-  const hh127n = findRow(req, "heavy-hex-127", "noisy");
-  const hh127i = findRow(req, "heavy-hex-127", "ideal");
+  const hh127s = (scaling || []).find((s) => s.topology === "heavy-hex-127");
 
   return (
     <div>
@@ -66,13 +85,13 @@ function HeadlineGroups({ results, scaling }) {
       </div>
       <p className="muted small" style={{ marginTop: -12, marginBottom: 20 }}>
         Rows have different qubit counts (5 / 127 / 20). Size-matched
-        comparison at ~127 qubits:{" "}
+        comparison at ~127 qubits (scaling sweep, 1000 shots):{" "}
         <span className="mono">hyperbolic-127</span> needs{" "}
         {hyp127 ? hyp127.swap_count : "?"} SWAPs (noisy F{" "}
         {hyp127 ? Number(hyp127.fidelity_noisy).toFixed(3) : "?"}) vs{" "}
         <span className="mono">heavy-hex-127</span>{" "}
-        {hh127i ? hh127i.swap_count : "?"} SWAPs (F{" "}
-        {hh127n ? hh127n.fidelity.toFixed(3) : "?"}){"."}
+        {hh127s ? hh127s.swap_count : "?"} SWAPs (F{" "}
+        {hh127s ? Number(hh127s.fidelity_noisy).toFixed(3) : "?"}).
       </p>
     </div>
   );
@@ -225,12 +244,22 @@ function CostPanel({ scaling }) {
 /** Interactive cost estimator: pick two cases, set your own assumptions,
  *  get a dollar estimate. Depths and yields come from the results data;
  *  every assumption is an editable input, labeled as such. */
-function CostCalculator({ results, topologies }) {
-  const rows = (results || []).filter((r) => r.condition !== "ideal");
+function CostCalculator({ results, topologies, scaling }) {
+  const matrixRows = (results || []).filter((r) => r.condition !== "ideal");
+  // hyperbolic-127 is supplementary: depth/yield come from the scaling sweep.
+  const hyp127s = (scaling || []).find((s) => s.topology === "hyperbolic-127");
+  const rows = hyp127s
+    ? [...matrixRows, {
+        topology: "hyperbolic-127", condition: "noisy",
+        depth_2q: Number(hyp127s.depth_2q), yield: 1.0,
+        num_qubits: Number(hyp127s.num_qubits),
+      }]
+    : matrixRows;
   const topoNames = [...new Set(rows.map((r) => r.topology))];
+  const condsFor = (top) => [...new Set(rows.filter((x) => x.topology === top).map((x) => x.condition))];
   const [topA, setTopA] = React.useState("heavy-hex-127");
   const [condA, setCondA] = React.useState("noisy");
-  const [topB, setTopB] = React.useState("hyperbolic-20");
+  const [topB, setTopB] = React.useState("hyperbolic-127");
   const [condB, setCondB] = React.useState("noisy");
   const [shots, setShots] = React.useState(1000000);
   const [price, setPrice] = React.useState(1.6);
@@ -238,7 +267,8 @@ function CostCalculator({ results, topologies }) {
   const [tFixed, setTFixed] = React.useState(665);
 
   const calc = (top, cond) => {
-    const r = rows.find((x) => x.topology === top && x.condition === cond) || rows[0];
+    const r = rows.find((x) => x.topology === top && x.condition === cond);
+    if (!r) return null;
     const d = Number(r.depth_2q) || 0;
     const y = Number(r.yield) || 1;
     const sec = shots > 0 ? (shots * (d * tLayer + tFixed)) / 1e6 : 0;
@@ -248,6 +278,14 @@ function CostCalculator({ results, topologies }) {
   };
   const A = calc(topA, condA);
   const B = calc(topB, condB);
+  if (!A || !B) {
+    return (
+      <div className="panel">
+        <h2>What would it cost?</h2>
+        <p className="muted">Loading benchmark data…</p>
+      </div>
+    );
+  }
   const sizeNote = A.r.num_qubits !== B.r.num_qubits;
   const topoA = (topologies || []).find((t) => t.name === topA);
   const topoB = (topologies || []).find((t) => t.name === topB);
@@ -266,8 +304,9 @@ function CostCalculator({ results, topologies }) {
       <h2>What would it cost? <span className="tag supp">estimate, not a bill</span></h2>
       <p className="sub">
         Pick two cases and set your own assumptions. Depths and yields come
-        from the measured benchmark; everything else is your input — change
-        the numbers and watch the answer move.
+        from the measured benchmark (9-case matrix plus the scaling sweep);
+        everything else is your input — change the numbers and watch the
+        answer move.
       </p>
       <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         {[["A", topA, setTopA, condA, setCondA], ["B", topB, setTopB, condB, setCondB]].map(
@@ -275,7 +314,11 @@ function CostCalculator({ results, topologies }) {
             <div key={label}>
               <h3>Geometry {label}</h3>
               <label className="small">Topology{" "}
-                <select value={top} onChange={(e) => setTop(e.target.value)}>
+                <select value={top} onChange={(e) => {
+                  const nt = e.target.value;
+                  setTop(nt);
+                  setCond(condsFor(nt)[0]);
+                }}>
                   {topoNames.map((t) => {
                     const nq = (rows.find((x) => x.topology === t) || {}).num_qubits;
                     return <option key={t} value={t}>{t} ({nq} qubits)</option>;
@@ -285,8 +328,9 @@ function CostCalculator({ results, topologies }) {
               <br />
               <label className="small">Condition{" "}
                 <select value={cond} onChange={(e) => setCond(e.target.value)}>
-                  <option value="noisy">noisy</option>
-                  <option value="protected">protected</option>
+                  {condsFor(top).map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
                 </select>
               </label>
             </div>
@@ -405,8 +449,10 @@ function HardwarePage({ hw, simNoisyF }) {
           </div>
           <div className="metric-cell">
             <span className="k">Measurements</span>
-            <span className="v mono" style={{ fontSize: 15 }}>
-              XX {Number(corr.XX).toFixed(3)} · YY {Number(corr.YY).toFixed(3)} · ZZ {Number(corr.ZZ).toFixed(3)}
+            <span className="v mono" style={{ fontSize: 15, display: "flex", flexDirection: "column", gap: 2 }}>
+              <span style={{ whiteSpace: "nowrap" }}>XX {Number(corr.XX).toFixed(3)}</span>
+              <span style={{ whiteSpace: "nowrap" }}>YY {Number(corr.YY).toFixed(3)}</span>
+              <span style={{ whiteSpace: "nowrap" }}>ZZ {Number(corr.ZZ).toFixed(3)}</span>
             </span>
             <span className="u">{hw.shots_per_circuit} shots each</span>
           </div>
@@ -423,7 +469,10 @@ function HardwarePage({ hw, simNoisyF }) {
         <ul className="small" style={{ paddingLeft: 20, margin: "12px 0" }}>
           <li>Chip: <span className="mono">{hw.backend}</span> — IBM's 156-qubit Heron processor</li>
           <li>Job <span className="mono">{hw.job_id}</span> — finished successfully</li>
-          <li>Sent {hw.submitted_utc} · done {hw.completed_utc}</li>
+          <li>
+            Sent {fmtTime(hw.submitted_utc)} · done {fmtTime(hw.completed_utc)}
+            {fmtDuration(hw.submitted_utc, hw.completed_utc) ? ` (${fmtDuration(hw.submitted_utc, hw.completed_utc)})` : ""}
+          </li>
           <li>{hw.shots_per_circuit} shots for each of the three measurements (6000 total)</li>
           <li>Bell pair between the two most distant qubits ({(hw.bell_pair || []).join(", ")}), {hw.graph_distance} hops apart</li>
         </ul>
@@ -585,7 +634,7 @@ export default function App() {
       {tab === "cost" && (
         <main>
           <CostPanel scaling={scaling} />
-          <CostCalculator results={results} topologies={topologies} />
+          <CostCalculator results={results} topologies={topologies} scaling={scaling} />
         </main>
       )}
       {tab === "hardware" && (

@@ -105,6 +105,10 @@ export default function TopologyGraph({ topology, highlight = [] }) {
           </g>
         ))}
       </svg>
+      <p className="small muted" style={{ marginTop: 6 }}>
+        Layout: qubits placed by graph distance from q0, so the drawing
+        shows how spread out the chip is. It is not the physical chip shape.
+      </p>
     </div>
   );
 }
