@@ -2,6 +2,7 @@ import React from "react";
 import { api, isStaticMode } from "./api/client";
 import TopologyGraph from "./components/TopologyGraph";
 import Topology3DTab from "./components/Topology3DTab";
+import CostSurface3D from "./components/CostSurface3D";
 import ResultsTable from "./components/ResultsTable";
 import RunExperiment from "./components/RunExperiment";
 import "./styles.css";
@@ -163,6 +164,15 @@ function CostPanel({ scaling }) {
   return (
     <div className="panel">
       <h2>Cloud-cost model <span className="tag supp">model, not a bill</span></h2>
+      <p className="explanation">
+        One honest note first: this is an <strong>approximate model</strong>,
+        not a real bill. The depths and yields are measured; the price,
+        layer time, and overhead are assumptions you can change below. The
+        ~{ratio.toFixed(2)}× depth ratio is the <strong>maximum</strong> advantage
+        the model allows — with realistic overhead the real gap is much
+        smaller, as the numbers show. We're keeping this simple version for
+        now and will refine it with real billing data later.
+      </p>
       <p className="sub">
         On time-billed quantum cloud, deeper circuits bill more QPU time.
         Size-matched at 127 qubits, the heavy-hex layout needs two-qubit
@@ -313,6 +323,16 @@ function CostCalculator({ results }) {
         Estimate only. Real bills depend on the provider's pricing, actual
         device timing, queueing, and calibration overhead.
       </p>
+      <h3 style={{ marginTop: 20 }}>See it in 3D</h3>
+      <p className="sub">
+        Cost for each geometry across shots and fixed overhead. Watch the
+        two surfaces start apart and merge as overhead takes over.
+      </p>
+      <CostSurface3D
+        depthA={A.d} depthB={B.d}
+        labelA={`${topA} (${condA})`} labelB={`${topB} (${condB})`}
+        price={price} tLayer={tLayer}
+      />
     </div>
   );
 }
