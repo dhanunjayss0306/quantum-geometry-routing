@@ -2,6 +2,7 @@ import React from "react";
 import { api, isStaticMode } from "./api/client";
 import TopologyGraph from "./components/TopologyGraph";
 import Topology3DTab from "./components/Topology3DTab";
+import Topology3D from "./components/Topology3D";
 import CostChart2D from "./components/CostChart2D";
 import ResultsTable from "./components/ResultsTable";
 import RunExperiment from "./components/RunExperiment";
@@ -224,7 +225,7 @@ function CostPanel({ scaling }) {
 /** Interactive cost estimator: pick two cases, set your own assumptions,
  *  get a dollar estimate. Depths and yields come from the results data;
  *  every assumption is an editable input, labeled as such. */
-function CostCalculator({ results }) {
+function CostCalculator({ results, topologies }) {
   const rows = (results || []).filter((r) => r.condition !== "ideal");
   const topoNames = [...new Set(rows.map((r) => r.topology))];
   const [topA, setTopA] = React.useState("heavy-hex-127");
@@ -248,6 +249,8 @@ function CostCalculator({ results }) {
   const A = calc(topA, condA);
   const B = calc(topB, condB);
   const sizeNote = A.r.num_qubits !== B.r.num_qubits;
+  const topoA = (topologies || []).find((t) => t.name === topA);
+  const topoB = (topologies || []).find((t) => t.name === topB);
 
   const num = (v, set) => (
     <input
@@ -289,6 +292,28 @@ function CostCalculator({ results }) {
             </div>
           )
         )}
+      </div>
+      <h3 style={{ marginTop: 16 }}>What they look like in 3D</h3>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        {[[topoA, "A", "#0e7c8c"], [topoB, "B", "#a85f1d"]].map(([t, label, color]) => (
+          <div key={label} className="panel" style={{ margin: 0 }}>
+            <h3>
+              <span className="mono">{t ? t.name : "—"}</span>{" "}
+              <span className="muted">geometry {label}</span>
+            </h3>
+            {t ? (
+              <>
+                <Topology3D topology={t} autoRotate={true} />
+                <p className="small muted" style={{ marginTop: 8 }}>
+                  {t.num_qubits} qubits, diameter {t.diameter}. Gold route: the
+                  worst-case Bell pair (q{t.bell_pair[0]} → q{t.bell_pair[1]}).
+                </p>
+              </>
+            ) : (
+              <p className="muted">Loading geometry…</p>
+            )}
+          </div>
+        ))}
       </div>
       <h3 style={{ marginTop: 16 }}>Your assumptions</h3>
       <ul className="small" style={{ paddingLeft: 20, margin: "8px 0", listStyle: "none" }}>
@@ -560,7 +585,7 @@ export default function App() {
       {tab === "cost" && (
         <main>
           <CostPanel scaling={scaling} />
-          <CostCalculator results={results} />
+          <CostCalculator results={results} topologies={topologies} />
         </main>
       )}
       {tab === "hardware" && (
