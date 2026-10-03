@@ -2,6 +2,12 @@
 
 **Track 4: Geometry-Aware Quantum Cloud Challenge** (IBM Qiskit Fall Fest 2026)
 
+A reproducible benchmark of Bell-state routing cost across quantum-chip
+coupling geometries, with an interactive dashboard.
+
+This repository is a reproducible benchmark and interactive research
+instrument, not a claim of a universally optimal quantum-chip topology.
+
 All results below are from Qiskit Aer simulation (AerSimulator), except one
 real-hardware t-shape validation run on IBM's `ibm_fez` QPU
 (see `docs/real_hardware.md`).
@@ -89,10 +95,12 @@ hardware with correlated noise.
 
 ## Protection
 
-Syndrome detection with post-selection -- not error correction. One ancilla
-measures the Bell stabilizers ZZ then XX via mid-circuit measurement; shots
-with a non-zero syndrome are discarded, and correlators are computed from
-the data bits only. Selection bits and scoring bits are disjoint, so the
+Syndrome-based error detection with post-selection -- not error correction.
+Protection here means error detection plus post-selection: one ancilla
+measures the Bell stabilizers ZZ then XX via mid-circuit measurement;
+shots with a non-zero syndrome are discarded, and correlators are computed
+from the data bits only. Discarded quantum states are not corrected or
+recovered. Selection bits and scoring bits are disjoint, so the
 filter cannot inflate fidelity by construction.
 
 Timing limitation: the ancilla is measured once, after routing completes, so
@@ -176,6 +184,18 @@ simulated noisy value 0.9203 within shot noise for this one case. Full
 record in `docs/real_hardware.md`. All 127-qubit and hyperbolic results
 are simulation.
 
+## Cloud-cost model
+
+On time-billed quantum cloud, deeper circuits bill more QPU time. The
+model (`scripts/cloud_cost.py`, `docs/cloud_cost.md`) turns measured
+two-qubit depths into relative cost: at 127 qubits the heavy-hex layout
+needs depth 17 vs hyperbolic's 9, i.e. **up to ~1.9x the QPU time per
+shot under a pure depth-proportional model** — an upper bound, not a
+measured bill. Fixed per-shot overhead (our `ibm_fez` job billed 4 s for
+6000 shots) shrinks the real ratio toward ~1.1x; see the sensitivity
+table in `docs/cloud_cost.md`. Cost units are model quantities, and the
+model applies to time-based billing only (not per-shot billing).
+
 ## Limitations
 
 - All benchmark results are Aer simulation with an idealized depolarizing +
@@ -190,7 +210,36 @@ are simulation.
 - Largest measured patch is 152 qubits; trends beyond that are
   extrapolation.
 
+## What this shows / does not show
+
+WHAT IT SHOWS:
+- Longer graph routes in this workload incur more routing overhead
+  (SWAPs, two-qubit depth) and lower noisy fidelity.
+- Near-matched hyperbolic patches showed lower measured diameter and
+  fewer SWAPs than the tested heavy-hex reference (e.g. 14 vs 25 SWAPs,
+  fidelity 0.863 vs 0.814 at 127 qubits).
+- The size-matched fidelity gaps persisted across the current seed sweep
+  (~4x seed std at ~20q, ~32x at 127q).
+- Syndrome-based error detection with post-selection increased measured
+  fidelity in the tested noisy cases, at a yield and circuit-overhead cost.
+- One small hardware validation case matched the corresponding simulation
+  within shot noise.
+
+WHAT IT DOES NOT SHOW:
+- A universally optimal topology.
+- A proven asymptotic scaling law for any family.
+- Fabrication feasibility of hyperbolic chips.
+- Universal accuracy of the simulated noise model on real hardware.
+- Scalable fault-tolerant error correction (protection here is error
+  detection plus post-selection).
+- Actual future cloud-billing savings (the cost model gives an upper
+  bound, not a bill).
+
 ## Run instructions
+
+Reproducible under the pinned software configuration below (Python 3.12,
+`requirements.txt`), subject to platform/runtime differences. Each script
+notes the artifact it writes.
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
@@ -204,7 +253,7 @@ python3 scripts/cloud_cost.py            # QPU cloud-cost model -> results/table
 python3 scripts/export_static_data.py    # static snapshot for the frontend -> frontend/public/data/
 python3 scripts/seed_sweep.py            # seed robustness -> results/tables/seed_sweep.csv
 python3 scripts/render_3d_figure.py      # static 3D figure -> results/figures/
-python3 -m pytest tests/ -q              # 43 tests
+python3 -m pytest tests/ -q              # run the suite; report the live count
 
 # API + dashboard (two terminals):
 uvicorn backend.main:app --port 8765       # http://localhost:8765/docs

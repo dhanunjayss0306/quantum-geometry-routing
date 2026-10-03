@@ -5,10 +5,21 @@ Which coupling-graph geometry minimizes the cost of entangling distant
 qubits on a quantum cloud processor?
 
 ## Provenance
-The 127-qubit IBM Eagle-style coupling map was extracted once from the
-Qiskit FakeSherbrooke fake backend and stored as
-`quantum/topologies/eagle127_edges.json`. All results are Qiskit Aer
-simulation; no IBM hardware was accessed.
+The 127-qubit IBM Eagle-style coupling map is a static edge list extracted
+once from the Qiskit FakeSherbrooke fake backend and stored as
+`quantum/topologies/eagle127_edges.json`. No real Eagle QPU was used; the
+map is a static stand-in for Eagle-style connectivity.
+
+The benchmark results are primarily Qiskit Aer simulations (see Procedure).
+Separately, one t-shape validation case was run on real IBM hardware
+(`ibm_fez`, 156-qubit Heron r2; full record in `docs/real_hardware.md`).
+That hardware run is a spot-check of the simulated noise model for one
+small case — it is not used to claim validation of the 127-qubit or
+hyperbolic benchmark results.
+
+Simulated noise is an idealized depolarizing (p1=0.001, p2=0.01) +
+readout (0.02) model, not a real device's correlated noise. The hardware
+spot-check does not show the model universally reproduces IBM hardware.
 
 ## Procedure (per case)
 1. **Generate** the Bell state |Phi+> on 2 logical qubits (H + CNOT).
@@ -36,8 +47,10 @@ simulation; no IBM hardware was accessed.
   fidelity gained and the shots discarded (the trade-off plot).
 
 ## Limitations
-- Every number in this repo comes from Qiskit Aer simulation
-  (AerSimulator, statevector/stabilizer methods). Nothing was run on a QPU.
+- The benchmark numbers come from Qiskit Aer simulation
+  (AerSimulator, statevector/stabilizer methods), except the single
+  t-shape hardware spot-check on `ibm_fez` (`docs/real_hardware.md`).
+  Nothing else was run on a QPU.
   Noise is a simulated depolarizing + readout model, not a real device's
   correlated noise; relative ordering across topologies should hold, but
   absolute fidelities will differ on hardware.

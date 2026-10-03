@@ -9,11 +9,11 @@ under the simulated noise model.
 Sizes are near-matched; exact qubit counts shown (from
 `results/tables/scaling.csv`).
 
-| Family | ~21q | ~62q | ~127q | Diameter growth |
+| Family | ~21q | ~62q | ~127q | Diameter growth (empirical fit, 3 points — not a law) |
 |---|---|---|---|---|
 | heavy-hex (IBM Eagle-style) | 21q: d=10 | 63q: d=18 | 127q: d=26 | ~2.3·√N |
 | square grid (flat reference) | 20q: d=7 | 64q: d=14 | 132q: d=21 | ~1.8·√N |
-| hyperbolic `{7,3}` (proposed) | 20q: d=7 | 61q: d=11 | 127q: d=15 | consistent with sub-√N growth over the 20-152q range measured; five points from one growth pattern are not enough to establish a law |
+| hyperbolic `{7,3}` (proposed) | 20q: d=7 | 61q: d=11 | 127q: d=15 | slower than √N over the 20-152q range measured; five points from one growth pattern are not enough to establish an asymptotic law |
 
 For the farthest-pair routing procedure used in this benchmark, the measured
 SWAP count follows the graph distance closely (about diameter − 1), and
@@ -36,18 +36,23 @@ discarded (yield 0.795).
    degree 4 buys little diameter improvement (it still scales as √N) while
    each extra coupler adds crosstalk and frequency-collision risk.
 
-2. **Slower diameter growth beats the grid.** In the tested range, the
-   `{7,3}` family showed slower diameter growth than the square grid and
-   heavy-hex; whether growth is logarithmic is not established by five
-   points from one growth pattern. Heavy-hex's ~2.3·√N is worse than a
-   plain grid's ~1.8·√N -- the subdivided honeycomb's degree-2 "wire"
-   qubits stretch paths without adding connectivity. Our `{7,3}` patch is
-   the only family measured here that beats the grid.
+2. **Slower diameter growth than the grid, in the tested range.** In the
+   tested range, the `{7,3}` family showed slower diameter growth than the
+   square grid and heavy-hex; whether growth is logarithmic is not
+   established by five points from one growth pattern — the data are
+   insufficient to establish an asymptotic scaling law. Heavy-hex's ~2.3·√N
+   is worse than a plain grid's ~1.8·√N -- the subdivided honeycomb's
+   degree-2 "wire" qubits stretch paths without adding connectivity. Our
+   `{7,3}` patch is the only family measured here with lower diameter than
+   the grid at near-matched sizes.
 
-3. **No long degree-2 chains.** Every degree-2 qubit is a wire: it adds a hop
-   without a routing choice. Heavy-hex is full of them (the "heavy" edge
-   qubits); they are the main reason its diameter constant (2.3) exceeds the
-   grid's (1.8). Cap degree-2 runs at length 1--2.
+3. **No long degree-2 chains (hypothesis).** Every degree-2 qubit is a
+   wire: it adds a hop without a routing choice. The heavy-hex graphs
+   tested here contain degree-2 wire-like qubits that contribute to longer
+   paths, but a controlled experiment is needed to isolate their
+   independent effect from face size and other confounders. Hypothesis for
+   follow-up: capping degree-2 runs at length 1--2 shortens diameters;
+   not yet tested.
 
 4. **Small faces (cycle length ≤ 8): correlation, not cause.** Short cycles
    correlate with shorter diameters in our data (`{7,3}` heptagons, length 7,
@@ -77,16 +82,18 @@ discarded (yield 0.795).
   only, but the mechanism is clear -- diameter is set by the longest
   shortest path, and a few non-planar shortcuts collapse it (small-world
   effect). Worth simulating next; not yet measured.
-- A `{7,3}` patch is a planar graph, so it is manufacturable as a coupler
-  layout in principle -- but no foundry builds heptagonal coupler graphs
-  today, and degree-3 vertices at non-standard angles need process work.
+- A `{7,3}` patch is a planar graph, which keeps it compatible in principle
+  with planar fabrication processes -- but this repository does not
+  demonstrate fabrication feasibility or device-level implementation, no
+  foundry builds heptagonal coupler graphs today, and degree-3 vertices at
+  non-standard angles would need process work.
 
 ## Caveats
 
 - Noise is simulated depolarizing + readout error, not a real device's
   correlated noise. Relative ordering should hold; absolute fidelities will
   differ on hardware.
-- Largest patch measured is 152 qubits; the measured trends suggest the
-  gap would widen at larger N, but that is extrapolation, not measurement.
+- Largest patch measured is 152 qubits. Whether the observed gap persists
+  or widens at larger N requires additional measurements.
 - Shot counts (1000/sweep point) leave ±0.01--0.02 statistical wobble in
   fidelity; diameter and SWAP counts are exact.

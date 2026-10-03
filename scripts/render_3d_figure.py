@@ -54,8 +54,9 @@ def main():
                      f"q{route[0]}→q{route[-1]}", fontsize=11)
         ax.set_box_aspect((1, 1, 0.7))
         ax.view_init(elev=22, azim=-60)
-    fig.suptitle("Flat chips vs curved hyperbolic chip: same worst-case Bell pair",
-                 fontsize=13, y=0.98)
+    fig.suptitle("T-shape reference, size-matched heavy-hex reference, and proposed {7,3} hyperbolic patch\n"
+                 "same worst-case Bell pair (heavy-hex-21 is a supplementary visual reference, not the required 127-qubit row)",
+                 fontsize=12, y=0.98)
     fig.tight_layout()
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     fig.savefig(OUT, dpi=150)
