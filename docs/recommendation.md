@@ -15,7 +15,7 @@ Sizes are near-matched; exact qubit counts shown.
 |---|---|---|---|---|
 | heavy-hex (IBM Eagle-style) | 21q: d=10 | 63q: d=18 | 127q: d=26 | ~2.3·√N |
 | square grid (flat reference) | 20q: d=7 | 64q: d=14 | 132q: d=21 | ~1.8·√N |
-| hyperbolic `{7,3}` (proposed) | 20q: d=7 | 61q: d=11 | 127q: d=15 | sub-√N, near-log |
+| hyperbolic `{7,3}` (proposed) | 20q: d=7 | 61q: d=11 | 127q: d=15 | consistent with sub-√N growth over the 20-152q range measured; five points from one growth pattern are not enough to establish a law |
 
 Routing a Bell state across the diameter (worst case) needs `diameter − 1`
 SWAPs, and noisy fidelity falls with SWAP count. At near-matched 127
@@ -46,9 +46,13 @@ discarded (yield 0.795).
    qubits); they are the main reason its diameter constant (2.3) exceeds the
    grid's (1.8). Cap degree-2 runs at length 1--2.
 
-4. **Small faces (cycle length ≤ 8).** Short cycles are local shortcuts:
-   `{7,3}` heptagons (length 7) vs heavy-hex dodecagons (length 12).
-   Measured: at N≈60, `{7,3}` diameter 11 vs heavy-hex 18.
+4. **Small faces (cycle length ≤ 8): correlation, not cause.** Short cycles
+   correlate with shorter diameters in our data (`{7,3}` heptagons, length 7,
+   vs heavy-hex dodecagons, length 12; at N≈60, `{7,3}` diameter 11 vs
+   heavy-hex 18). But the heavy-hex vs hyperbolic difference is confounded
+   with heavy-hex's degree-2 wire qubits, which independently stretch paths.
+   This experiment did not isolate face size, so treat it as a hypothesis
+   for a controlled follow-up, not a design rule.
 
 5. **Budget for error detection; its value grows with route length.**
    Syndrome protection (ancilla ZZ/XX parity checks) recovers 0.014 fidelity

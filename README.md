@@ -53,6 +53,13 @@ Supplementary size-matched row:
 |---|---|---|---|---|---|---|---|---|
 | heavy-hex-21 | 1.0000 | 0.8938 | 0.9208 | 0.881 | 9 | +1 | 6 / 6 / 13 | +7 |
 
+The required matrix follows the Track 4 spec (5-qubit T, real 127-qubit
+Eagle map, hyperbolic patch), so its rows have different qubit counts
+(5 / 127 / 20) and the fidelity differences between rows partly reflect
+size, not just geometry. Size-matched comparisons are in the
+supplementary heavy-hex-21 row above, the scaling table, and the seed
+sweep.
+
 ## Noise
 
 Depolarizing errors (single-qubit p=0.001, two-qubit p=0.01) plus readout
@@ -118,17 +125,26 @@ Sizes are near-matched, not identical; exact counts are shown.
 - Syndrome protection recovers the most fidelity where the route is
   longest: +0.113 on Eagle-127 (0.820 → 0.934), vs +0.014-0.027 on the
   small chips.
-- Seed robustness (`scripts/seed_sweep.py`, seeds 1-5 and 42, 2000 shots):
+- Seed robustness (`scripts/seed_sweep.py`, seeds 1-5 and 42, 2000 shots).
+  Supplementary rows support size-matched comparisons:
 
-| Topology | Noisy F (mean ± std) | Protected F (mean ± std) |
-|---|---|---|
-| t-shape | 0.9236 ± 0.0056 | 0.9358 ± 0.0008 |
-| heavy-hex-127 | 0.8194 ± 0.0016 | 0.9344 ± 0.0003 |
-| hyperbolic-20 | 0.9046 ± 0.0032 | 0.9255 ± 0.0009 |
+| Topology | Req. | Noisy F (mean ± std) | Protected F (mean ± std) |
+|---|---|---|---|
+| t-shape | yes | 0.9236 ± 0.0056 | 0.9358 ± 0.0008 |
+| heavy-hex-127 | yes | 0.8194 ± 0.0016 | 0.9344 ± 0.0003 |
+| hyperbolic-20 | yes | 0.9046 ± 0.0032 | 0.9255 ± 0.0009 |
+| heavy-hex-21 | no | 0.8914 ± 0.0019 | 0.9207 ± 0.0003 |
+| hyperbolic-127 | no | 0.8712 ± 0.0013 | 0.9233 ± 0.0001 |
 
-  The hyperbolic-20 vs heavy-hex-127 noisy gap (0.085) is ~25× the seed
-  spread (~0.003), so the ordering is robust to seed choice. SWAP counts
-  are deterministic (identical across seeds).
+  Size-matched noisy-fidelity comparisons. hyperbolic-20 vs heavy-hex-21:
+  gap 0.0132, seed stds 0.0032 / 0.0019, so the gap is ~4x the larger std.
+  hyperbolic-127 vs heavy-hex-127: gap 0.0518, seed stds 0.0013 / 0.0016,
+  so the gap is ~32x the larger std. The 127-qubit pair shows a clear
+  geometry signal above seed noise; the 20-qubit pair is distinguishable
+  from seed noise (~4x) but small in absolute terms. We no longer cite
+  hyperbolic-20 vs heavy-hex-127 as evidence: that 0.085 gap mostly
+  measures the size difference. SWAP counts are deterministic (identical
+  across seeds).
 - Coupling-graph features suggested by the data: `docs/recommendation.md`.
 
 ## Limitations
@@ -155,7 +171,7 @@ python3 scripts/run_all_cases.py         # 9 required + 3 supplementary -> exper
 python3 scripts/scaling_sweep.py         # 15 chips, 20->152 qubits -> results/tables/
 python3 scripts/seed_sweep.py            # seed robustness -> results/tables/seed_sweep.csv
 python3 scripts/render_3d_figure.py      # static 3D figure -> results/figures/
-python3 -m pytest tests/ -q              # 26+ tests
+python3 -m pytest tests/ -q              # 30 tests
 
 # API + dashboard (two terminals):
 uvicorn backend.main:app --port 8765       # http://localhost:8765/docs
