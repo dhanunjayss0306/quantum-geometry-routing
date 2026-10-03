@@ -4,8 +4,8 @@ import Topology3D from "./Topology3D";
 function plainEnglish(t) {
   const hops = t.diameter;
   if (t.family === "hyperbolic")
-    return `${hops} hops on ${t.num_qubits} qubits because the surface curves away, so each ring holds exponentially more qubits and distant pairs stay close.`;
-  return `${hops} hops on ${t.num_qubits} qubits because the flat layout forces long chains between its most distant qubits.`;
+    return `${hops} hops on ${t.num_qubits} qubits. The surface curves away, so each ring holds more qubits and distant pairs stay close.`;
+  return `${hops} hops on ${t.num_qubits} qubits. The flat layout forces long chains between its most distant qubits.`;
 }
 
 function stat(results, topology, condition, field) {
@@ -22,27 +22,29 @@ function ChipStats({ topology, results }) {
   const rows = [
     ["Qubits", topology.num_qubits],
     ["Diameter", `${topology.diameter} hops`],
-    ["SWAPs (worst-case route)", swaps ?? topology.diameter - 1],
-    ["Noisy fidelity", noisyF != null ? noisyF.toFixed(3) : "—"],
-    ["Protected yield", protYield != null ? protYield.toFixed(3) : "—"],
+    ["SWAPs, worst-case route", swaps ?? topology.diameter - 1],
+    ["Noisy fidelity", noisyF != null ? noisyF.toFixed(3) : "n/a"],
+    ["Protected yield", protYield != null ? protYield.toFixed(3) : "n/a"],
   ];
   return (
-    <div className="card">
+    <div className="panel">
       <h3>
-        {topology.name} <small>({topology.family})</small>
+        <span className="mono">{topology.name}</span>{" "}
+        <span className="muted">({topology.family})</span>
       </h3>
-      <div className="metrics">
+      <div className="metric-strip">
         {rows.map(([k, v]) => (
-          <div key={k}>
-            <span>{k}</span>
-            <b>{v}</b>
+          <div key={k} className="metric-cell">
+            <span className="k">{k}</span>
+            <span className="v" style={{ fontSize: 16 }}>{v}</span>
           </div>
         ))}
       </div>
       <p className="explanation">{plainEnglish(topology)}</p>
       {topology.family === "hyperbolic" && (
         <p className="muted">
-          The hyperbolic chip is a simulated proposal, not fabricated hardware.
+          Geometric visualization of proposed {"{7,3}"} coupling topology.
+          Simulated proposal, not fabricated hardware.
         </p>
       )}
     </div>
@@ -63,7 +65,12 @@ export default function Topology3DTab({ topologies, results }) {
 
   return (
     <main>
-      <div className="card">
+      <div className="panel">
+        <h2>Coupling-graph viewer</h2>
+        <p className="sub">
+          Geometry from <span className="mono">GET /api/topologies</span>.
+          Drag to orbit, scroll or pinch to zoom.
+        </p>
         <div className="form-row">
           <label>
             Chip
@@ -98,21 +105,23 @@ export default function Topology3DTab({ topologies, results }) {
           </label>
         </div>
         <p className="muted">
-          Drag to orbit, scroll or pinch to zoom. The gold tube is the worst-case
-          Bell-pair route — the path that needs the most SWAPs. Flat chips sit on
-          a plane; the hyperbolic chip sits on a curved surface where the number
-          of qubits per ring grows exponentially.
+          The amber tube marks the worst-case Bell-pair route, the path that
+          needs the most SWAPs. Flat chips sit on a plane. The hyperbolic chip
+          sits on a curved surface where the qubit count per ring grows
+          exponentially.
         </p>
       </div>
 
-      <div className={compare ? "grid" : ""}>
+      <div className={compare ? "grid-2" : ""}>
         {shown.map((t) => (
-          <div key={t.name} className="card">
+          <div key={t.name} className="panel">
             <div className="topo3d-head">
               <h3>
-                {t.name} <small>({t.num_qubits} qubits)</small>
+                <span className="mono">{t.name}</span>{" "}
+                <span className="muted">({t.num_qubits} qubits)</span>
               </h3>
               <button
+                className="btn"
                 onClick={() =>
                   viewerRefs.current[t.name]?.exportPNG?.(`${t.name}-3d.png`)
                 }
@@ -126,9 +135,11 @@ export default function Topology3DTab({ topologies, results }) {
               normalize={compare}
               autoRotate={autoRotate}
             />
-            <p className="muted">
-              Worst-case Bell pair: q{t.bell_pair[0]} → q{t.bell_pair[1]} (
-              {t.diameter} hops, route {t.route.join(" → ")})
+            <p className="muted small">
+              Worst-case Bell pair:{" "}
+              <span className="mono">q{t.bell_pair[0]} to q{t.bell_pair[1]}</span>{" "}
+              ({t.diameter} hops, route{" "}
+              <span className="mono">{t.route.join(" -> ")}</span>)
             </p>
           </div>
         ))}

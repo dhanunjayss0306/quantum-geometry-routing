@@ -1,6 +1,6 @@
 # Quantum Geometry Routing
 
-**Track 4 — Geometry-Aware Quantum Cloud Challenge** (IBM Qiskit Fall Fest 2026)
+**Track 4: Geometry-Aware Quantum Cloud Challenge** (IBM Qiskit Fall Fest 2026)
 
 All results below are from Qiskit Aer simulation (AerSimulator). Nothing was
 run on a QPU.

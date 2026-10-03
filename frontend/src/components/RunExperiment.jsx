@@ -62,8 +62,12 @@ export default function RunExperiment() {
   };
 
   return (
-    <div className="card">
-      <h3>Run an experiment</h3>
+    <div className="panel">
+      <h2>Run an experiment</h2>
+      <p className="sub">
+        Live Bell-state routing on the selected topology, simulated with
+        Qiskit Aer. Same noise model and seed convention as the stored matrix.
+      </p>
       <div className="form-row">
         <label>
           Topology
@@ -91,21 +95,21 @@ export default function RunExperiment() {
             onChange={(e) => setShots(e.target.value)}
           />
         </label>
-        <button onClick={run} disabled={loading}>
-          {loading ? "Running..." : "Run Bell-state routing"}
+        <button className="btn primary" onClick={run} disabled={loading}>
+          {loading ? "Running..." : "Run experiment"}
         </button>
       </div>
-      {error && <p className="error">Error: {error}</p>}
+      {error && <p className="error" role="alert">Error: {error}</p>}
       {result && (
-        <div className="result">
-          <div className="metrics">
-            <div><span>SWAPs</span><b>{result.swap_count}</b></div>
-            <div><span>CX gates</span><b>{result.cx_count}</b></div>
-            <div><span>2q depth</span><b>{result.depth_2q}</b></div>
-            <div><span>Fidelity</span><b>{result.fidelity.toFixed(4)}</b></div>
-            <div><span>Yield</span><b>{result.yield.toFixed(3)}</b></div>
+        <div className="result" style={{ marginTop: 16 }}>
+          <div className="metric-strip">
+            <div className="metric-cell"><span className="k">SWAPs</span><span className="v">{result.swap_count}</span></div>
+            <div className="metric-cell"><span className="k">CX gates</span><span className="v">{result.cx_count}</span></div>
+            <div className="metric-cell"><span className="k">2q depth</span><span className="v">{result.depth_2q}</span></div>
+            <div className="metric-cell"><span className="k">Fidelity</span><span className="v">{result.fidelity.toFixed(4)}</span></div>
+            <div className="metric-cell"><span className="k">Yield</span><span className="v">{result.yield.toFixed(3)}</span></div>
             {result.condition === "protected" && (
-              <div><span>Protection cost</span><b>+{result.added_swap_count} SWAPs, +{result.added_cx_count} CX</b></div>
+              <div className="metric-cell"><span className="k">Protection cost</span><span className="v" style={{ fontSize: 15 }}>+{result.added_swap_count} SWAP, +{result.added_cx_count} CX</span></div>
             )}
           </div>
           <p className="explanation">{explain(result)}</p>

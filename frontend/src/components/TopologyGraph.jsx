@@ -54,7 +54,8 @@ export default function TopologyGraph({ topology, highlight = [] }) {
   );
   const hl = new Set(highlight);
   return (
-    <svg width={W} height={H} style={{ background: "#0d1117", borderRadius: 8 }}>
+    <svg width={W} height={H} className="topo-svg" role="img"
+         aria-label={`Coupling graph of ${topology.num_qubits} qubits`}>
       {topology.edges.map(([a, b], i) => (
         <line
           key={i}
@@ -62,7 +63,7 @@ export default function TopologyGraph({ topology, highlight = [] }) {
           y1={pos[a][1]}
           x2={pos[b][0]}
           y2={pos[b][1]}
-          stroke={hl.has(a) && hl.has(b) ? "#f0b429" : "#30363d"}
+          stroke={hl.has(a) && hl.has(b) ? "#a85f1d" : "#b9ae97"}
           strokeWidth={hl.has(a) && hl.has(b) ? 2.5 : 1.2}
         />
       ))}
@@ -72,11 +73,12 @@ export default function TopologyGraph({ topology, highlight = [] }) {
             cx={x}
             cy={y}
             r={hl.has(Number(n)) ? 9 : 6}
-            fill={hl.has(Number(n)) ? "#f0b429" : "#1f6feb"}
-            stroke="#0d1117"
+            fill={hl.has(Number(n)) ? "#a85f1d" : "#4e7a77"}
+            stroke="#f7f4ee"
             strokeWidth={1.5}
           />
-          <text x={x} y={y + 3.5} textAnchor="middle" fontSize={8} fill="#fff">
+          <text x={x} y={y + 3.5} textAnchor="middle" fontSize={8} fill="#1e1b16"
+                fontFamily="IBM Plex Mono, monospace">
             {n}
           </text>
         </g>
