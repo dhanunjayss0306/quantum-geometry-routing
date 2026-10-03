@@ -165,6 +165,7 @@ const TABS = [
   ["3d", "3D View"],
   ["cost", "Cloud cost"],
   ["hardware", "Real hardware"],
+  ["zenodo", "Zenodo"],
   ["run", "Run"],
 ];
 
@@ -406,6 +407,80 @@ function CostCalculator({ results, topologies, scaling }) {
   );
 }
 
+/** Zenodo archive page: what the dataset is, what's inside, how to publish. */
+function ZenodoPage() {
+  const files = [
+    ["summary.csv", "The 9-case matrix: fidelities, SWAPs, depths, yields (seed 42, 2000 shots)."],
+    ["scaling.csv", "15-point size sweep for size-matched geometry comparisons."],
+    ["seed_sweep.csv", "6-seed robustness check."],
+    ["cloud_cost.csv", "Modeled QPU-time cost from two-qubit depths (a model, not a bill)."],
+    ["cloud_cost_sensitivity.csv", "How the modeled cost ratio shrinks as fixed overhead grows."],
+    ["tshape_real_backend.json", "The one real ibm_fez run, with full provenance and raw counts."],
+    ["methodology.md", "How every number was produced."],
+    ["real_hardware.md", "The full record of the real-hardware validation run."],
+    ["cloud_cost.md", "The cost model, its limits, and the sensitivity table."],
+    ["recommendation.md", "Observed results, labeled interpretations, and future hypotheses."],
+    ["README.md", "Project overview and run instructions."],
+    ["CITATION.cff", "Machine-readable citation with the three author names."],
+    ["LICENSE", "MIT license for the code."],
+  ];
+  return (
+    <main>
+      <div className="panel">
+        <h2>Zenodo archive <span className="tag supp">DOI pending</span></h2>
+        <p className="sub">
+          Zenodo is a free research archive (run by CERN). We put a frozen
+          copy of our dataset there so anyone — including the judges — can
+          cite it with a permanent DOI link that never breaks. GitHub holds
+          the living code; Zenodo holds the citable snapshot.
+        </p>
+        <p className="small">
+          <strong>Status:</strong> not published yet. The dataset below is
+          packed and ready — publishing happens on zenodo.org and takes a
+          few minutes.
+        </p>
+        <a
+          className="btn"
+          href="data/quantum-geometry-routing-dataset.zip"
+          download="quantum-geometry-routing-dataset.zip"
+          style={{ display: "inline-block", marginTop: 8 }}
+        >
+          Download the dataset (.zip)
+        </a>
+      </div>
+      <div className="panel">
+        <h2>What's inside</h2>
+        <ul className="small" style={{ paddingLeft: 20, margin: "12px 0" }}>
+          {files.map(([name, desc]) => (
+            <li key={name} style={{ marginBottom: 6 }}>
+              <span className="mono">{name}</span> — {desc}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="panel">
+        <h2>Citation</h2>
+        <ul className="small" style={{ paddingLeft: 20, margin: "12px 0" }}>
+          <li>Authors: Dhanunjay Reddy, Mohit Sai Satyanarayana, Leela Prasad</li>
+          <li>License: CC-BY-4.0 for the dataset (code is MIT)</li>
+          <li>Code: <span className="mono">github.com/dhanunjayss0306/quantum-geometry-routing</span></li>
+          <li>DOI: issued when the record is published</li>
+        </ul>
+      </div>
+      <div className="panel">
+        <h2>Publishing checklist</h2>
+        <ol className="small" style={{ paddingLeft: 20, margin: "12px 0" }}>
+          <li>Log in to zenodo.org (free; GitHub login works).</li>
+          <li>New upload → upload the zip (button above).</li>
+          <li>Paste the title and description; add the three author names.</li>
+          <li>License CC-BY-4.0; add the keywords.</li>
+          <li>Link the GitHub repo as a related identifier.</li>
+          <li>Review everything, then Publish. The DOI is issued on publish.</li>
+        </ol>
+      </div>
+    </main>
+  );
+}
 /** Real-hardware validation page: the t-shape case run on ibm_fez.
  *  Full provenance plus the explicit caveat that the hardware circuit
  *  differs from the abstract simulated pipeline. */
@@ -643,6 +718,7 @@ export default function App() {
           simNoisyF={(findRow(results, "t-shape", "noisy") || {}).fidelity}
         />
       )}
+      {tab === "zenodo" && <ZenodoPage />}
       {tab === "run" && (
         <main>
           <RunExperiment topologies={topologies} staticMode={staticMode} />
