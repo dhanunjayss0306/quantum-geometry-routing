@@ -2,7 +2,7 @@ import React from "react";
 import { api, isStaticMode } from "./api/client";
 import TopologyGraph from "./components/TopologyGraph";
 import Topology3DTab from "./components/Topology3DTab";
-import CostSurface3D from "./components/CostSurface3D";
+import CostChart2D from "./components/CostChart2D";
 import ResultsTable from "./components/ResultsTable";
 import RunExperiment from "./components/RunExperiment";
 import "./styles.css";
@@ -323,15 +323,15 @@ function CostCalculator({ results }) {
         Estimate only. Real bills depend on the provider's pricing, actual
         device timing, queueing, and calibration overhead.
       </p>
-      <h3 style={{ marginTop: 20 }}>See it in 3D</h3>
+      <h3 style={{ marginTop: 20 }}>Where the money goes</h3>
       <p className="sub">
-        Cost for each geometry across shots and fixed overhead. Watch the
-        two surfaces start apart and merge as overhead takes over.
+        Total estimated cost for each geometry as fixed overhead per shot
+        grows. The lines start apart and meet — that is the whole story.
       </p>
-      <CostSurface3D
+      <CostChart2D
         depthA={A.d} depthB={B.d}
         labelA={`${topA} (${condA})`} labelB={`${topB} (${condB})`}
-        price={price} tLayer={tLayer}
+        shots={shots} price={price} tLayer={tLayer} tFixed={tFixed}
       />
     </div>
   );
