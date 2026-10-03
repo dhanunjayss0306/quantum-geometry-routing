@@ -35,6 +35,7 @@ const TOPOLOGIES = [
   ["star", "star (2016 variant)"],
   ["heavy-hex-21", "heavy-hex 21q (IBM-style)"],
   ["heavy-hex-35", "heavy-hex 35q (IBM-style)"],
+  ["heavy-hex-127", "heavy-hex 127q (real Eagle map)"],
   ["hyperbolic-20", "hyperbolic {7,3} 20q (proposed)"],
   ["hyperbolic-43", "hyperbolic {7,3} 43q (proposed)"],
 ];

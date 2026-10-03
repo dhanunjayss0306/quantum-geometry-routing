@@ -1,8 +1,12 @@
-"""Run the full 9-case matrix and generate all submission artifacts.
+"""Run the experiment matrix and generate all submission artifacts.
+
+The 9 required cases (Track 4: 3 processors x ideal/noisy/protected):
+  t-shape, heavy-hex-127 (real Eagle map), hyperbolic-20
+plus 3 supplementary size-matched cases for heavy-hex-21.
 
 Outputs:
   experiments/results/<topology>_<condition>.json   per-case raw results
-  results/tables/summary.csv                        the 9-case table
+  results/tables/summary.csv                        all 12 cases (required flag)
   results/figures/fidelity.png                       fidelity comparison chart
   results/figures/routing_cost.png                   SWAPs + depth chart
   results/figures/protection_tradeoff.png            fidelity vs yield (protected)
@@ -24,15 +28,19 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from quantum.topologies.tshape import TShapeTopology
-from quantum.topologies.heavy_hex import HeavyHexPatch
+from quantum.topologies.heavy_hex import HeavyHexPatch, Eagle127Topology
 from quantum.topologies.hyperbolic import HyperbolicTiling
 from algorithms.experiment_matrix import run_matrix, CONDITIONS
 
 SHOTS = 2000
 SEED = 42
-# Headline comparison at matched sizes (~20 qubits); the T-shape is the
-# 5-qubit 2016 reference. The full size story lives in scaling_sweep.py.
-TOPOLOGIES = [TShapeTopology(), HeavyHexPatch(1, 2), HyperbolicTiling(17)]
+# Required 9: the IBM-style row is the real 127-qubit Eagle coupling map,
+# per the Track 4 spec ("127-qubit heavy-hex snippet or fake hardware").
+# HyperbolicTiling(20): the growth loop adds whole heptagons and stops once
+# the target is reached, so a target of 20 yields exactly the 20-qubit patch.
+TOPOLOGIES = [TShapeTopology(), Eagle127Topology(), HyperbolicTiling(20)]
+# Supplementary: size-matched heavy-hex-21 for the ~20-qubit comparison.
+SUPPLEMENTARY_TOPOLOGIES = [HeavyHexPatch(1, 2)]
 COLORS = {"ideal": "#2ca02c", "noisy": "#d62728", "protected": "#1f77b4"}
 
 
@@ -48,12 +56,21 @@ def save_results(results):
         w = csv.DictWriter(f, fieldnames=list(results[0].keys()))
         w.writeheader()
         w.writerows(results)
-    print(f"saved {len(results)} JSON results + summary.csv")
+    n_req = sum(1 for r in results if r["required"])
+    print(f"saved {len(results)} JSON results + summary.csv "
+          f"({n_req} required, {len(results) - n_req} supplementary)")
+
+
+def _required(results):
+    return [r for r in results if r["required"]]
 
 
 def chart_fidelity(results):
+    results = _required(results)
     fig, ax = plt.subplots(figsize=(10, 5))
-    topologies = [t.name for t in TOPOLOGIES]
+    topologies = sorted({r["topology"] for r in results},
+                        key=lambda t: ["t-shape", "heavy-hex-127",
+                                       "hyperbolic-20"].index(t))
     x = range(len(topologies))
     width = 0.25
     for i, cond in enumerate(CONDITIONS):
@@ -67,7 +84,8 @@ def chart_fidelity(results):
     ax.set_xticklabels(topologies)
     ax.set_ylabel("Bell-state fidelity")
     ax.set_ylim(0, 1.08)
-    ax.set_title("Bell-state fidelity across topologies and conditions")
+    ax.set_title("Bell-state fidelity across topologies and conditions "
+                 "(Aer simulation)")
     ax.legend()
     fig.tight_layout()
     fig.savefig(f"{REPO_ROOT}/results/figures/fidelity.png", dpi=150)
@@ -75,8 +93,11 @@ def chart_fidelity(results):
 
 
 def chart_routing_cost(results):
+    results = _required(results)
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
-    topologies = [t.name for t in TOPOLOGIES]
+    topologies = sorted({r["topology"] for r in results},
+                        key=lambda t: ["t-shape", "heavy-hex-127",
+                                       "hyperbolic-20"].index(t))
     x = range(len(topologies))
     for ax, metric, title in zip(axes,
                                  ["swap_count", "depth_2q"],
@@ -98,8 +119,11 @@ def chart_routing_cost(results):
 
 def chart_protection_cost(results):
     """What protection costs (extra SWAPs/depth) vs what it buys (fidelity)."""
+    results = _required(results)
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
-    topologies = [t.name for t in TOPOLOGIES]
+    topologies = sorted({r["topology"] for r in results},
+                        key=lambda t: ["t-shape", "heavy-hex-127",
+                                       "hyperbolic-20"].index(t))
     x = range(len(topologies))
     prot = [next(r for r in results
                  if r["topology"] == t and r["condition"] == "protected")
@@ -134,6 +158,7 @@ def chart_protection_cost(results):
 
 
 def chart_protection_tradeoff(results):
+    results = _required(results)
     fig, ax = plt.subplots(figsize=(7, 5))
     for r in results:
         if r["condition"] != "protected":
@@ -157,16 +182,32 @@ def chart_protection_tradeoff(results):
 
 
 def main():
-    print("Running the 9-case experiment matrix ...")
+    print("Running the 9 required cases + 3 supplementary ...")
     results = run_matrix(TOPOLOGIES, shots=SHOTS, seed=SEED)
+    for r in results:
+        r["required"] = True
+    supp = run_matrix(SUPPLEMENTARY_TOPOLOGIES, shots=SHOTS, seed=SEED)
+    for r in supp:
+        r["required"] = False
+    results.extend(supp)
     save_results(results)
     chart_fidelity(results)
     chart_routing_cost(results)
     chart_protection_tradeoff(results)
     chart_protection_cost(results)
     print("charts written to results/figures/")
-    print("\nSummary:")
+    print("\nSummary (required):")
     for r in results:
+        if not r["required"]:
+            continue
+        print(f"  {r['topology']:14s} {r['condition']:9s} "
+              f"SWAPs={r['swap_count']:3d} depth2q={r['depth_2q']:2d} "
+              f"F={r['fidelity']:.4f} yield={r['yield']:.3f} "
+              f"+SWAPs={r['added_swap_count']} +CX={r['added_cx_count']}")
+    print("\nSummary (supplementary):")
+    for r in results:
+        if r["required"]:
+            continue
         print(f"  {r['topology']:14s} {r['condition']:9s} "
               f"SWAPs={r['swap_count']:3d} depth2q={r['depth_2q']:2d} "
               f"F={r['fidelity']:.4f} yield={r['yield']:.3f} "

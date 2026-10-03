@@ -4,7 +4,7 @@ import networkx as nx
 
 from quantum.topologies.star import StarTopology
 from quantum.topologies.tshape import TShapeTopology
-from quantum.topologies.heavy_hex import HeavyHexPatch
+from quantum.topologies.heavy_hex import HeavyHexPatch, Eagle127Topology
 from quantum.topologies.hyperbolic import HyperbolicTiling
 from quantum.topologies.layout3d import layout_3d
 from algorithms.experiment_matrix import farthest_pair
@@ -15,7 +15,8 @@ _BUILDERS = {
     "star": StarTopology,
     "heavy-hex-21": lambda: HeavyHexPatch(1, 2),
     "heavy-hex-35": lambda: HeavyHexPatch(2, 2),
-    "hyperbolic-20": lambda: HyperbolicTiling(17),
+    "heavy-hex-127": Eagle127Topology,
+    "hyperbolic-20": lambda: HyperbolicTiling(20),
     "hyperbolic-43": lambda: HyperbolicTiling(40),
 }
 

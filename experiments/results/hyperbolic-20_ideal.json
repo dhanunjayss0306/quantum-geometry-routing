@@ -22,5 +22,6 @@
   "yield": 1.0,
   "shots": 2000,
   "seed": 42,
-  "noise": null
+  "noise": null,
+  "required": true
 }

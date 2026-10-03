@@ -1,24 +1,24 @@
 {
-  "topology": "heavy-hex-21",
+  "topology": "heavy-hex-127",
   "condition": "noisy",
-  "num_qubits": 21,
+  "num_qubits": 127,
   "bell_pair": [
     0,
-    9
+    126
   ],
-  "graph_distance": 10,
-  "swap_count": 9,
+  "graph_distance": 26,
+  "swap_count": 25,
   "cx_count": 1,
-  "depth": 7,
-  "depth_2q": 6,
+  "depth": 17,
+  "depth_2q": 17,
   "added_swap_count": 0,
   "added_cx_count": 0,
   "added_depth": 0,
   "added_depth_2q": 0,
-  "xx": 0.866,
-  "yy": -0.834,
-  "zz": 0.875,
-  "fidelity": 0.8938,
+  "xx": 0.817,
+  "yy": -0.698,
+  "zz": 0.766,
+  "fidelity": 0.8202,
   "yield": 1.0,
   "shots": 2000,
   "seed": 42,
@@ -27,5 +27,5 @@
     "p2": 0.01,
     "readout": 0.02
   },
-  "required": false
+  "required": true
 }

@@ -5,26 +5,29 @@ a chip's two farthest qubits -- the coupling graph's diameter scaling is the
 strongest predictor of cost. We measured three families from ~20 to 152
 qubits. The hyperbolic `{7,3}` patch had the smallest diameter at every
 measured size, and the industry-standard heavy-hex had a larger diameter
-than even a plain square grid at matched sizes.
+than even a plain square grid at near-matched sizes.
 
 ## The evidence (from `results/tables/scaling.csv`)
 
-| Family | N=21 | N≈60 | N≈127 | Diameter law (fit) |
-|---|---|---|---|---|
-| heavy-hex (IBM Eagle-style) | d=10 | d=18 | d=26 | ~2.3·√N |
-| square grid (flat reference) | d=7 | d=14 | d=18* | ~1.8·√N |
-| hyperbolic `{7,3}` (ours) | d=7 | d=11 | d=16* | sub-√N, near-log |
+Sizes are near-matched; exact qubit counts shown.
 
-\* largest measured: grid-100, hyperbolic-152.
+| Family | ~21q | ~62q | ~127q | Diameter law (fit) |
+|---|---|---|---|---|
+| heavy-hex (IBM Eagle-style) | 21q: d=10 | 63q: d=18 | 127q: d=26 | ~2.3·√N |
+| square grid (flat reference) | 20q: d=7 | 64q: d=14 | 132q: d=21 | ~1.8·√N |
+| hyperbolic `{7,3}` (proposed) | 20q: d=7 | 61q: d=11 | 127q: d=15 | sub-√N, near-log |
 
 Routing a Bell state across the diameter (worst case) needs `diameter − 1`
-SWAPs, and noisy fidelity falls with SWAP count:
+SWAPs, and noisy fidelity falls with SWAP count. At near-matched 127
+qubits:
 
 - heavy-hex-127: 25 SWAPs → fidelity **0.814**
-- hyperbolic-152: 15 SWAPs → fidelity **0.868**
-- Syndrome protection on heavy-hex-21 (9-case matrix): fidelity 0.894 →
-  0.921, at a cost of +1 SWAP, +4 CX, +7 two-qubit depth, and 12% of shots
-  discarded (yield 0.881).
+- hyperbolic-127: 14 SWAPs → fidelity **0.863**
+- grid-11x12 (132q): 20 SWAPs → fidelity **0.839**
+
+Syndrome protection on heavy-hex-127 (9-case matrix): fidelity 0.820 →
+0.934, at a cost of +5 SWAPs, +4 CX, +9 two-qubit depth, and 20.5% of shots
+discarded (yield 0.795).
 
 ## Recommended coupling-graph features
 
@@ -47,12 +50,19 @@ SWAPs, and noisy fidelity falls with SWAP count:
    `{7,3}` heptagons (length 7) vs heavy-hex dodecagons (length 12).
    Measured: at N≈60, `{7,3}` diameter 11 vs heavy-hex 18.
 
-5. **Budget for error detection, or avoid needing it.** Syndrome protection
-   (ancilla ZZ/XX parity checks) recovers ~0.03 fidelity on heavy-hex-21 but
-   costs +4 CX, +7 two-qubit depth and 12% yield. A topology that needs 3
-   fewer SWAPs buys more fidelity than protection recovers here. Prefer
-   reducing the route length over adding checks; reserve ancilla checks for
-   the longest routes.
+5. **Budget for error detection; its value grows with route length.**
+   Syndrome protection (ancilla ZZ/XX parity checks) recovers 0.014 fidelity
+   on t-shape and 0.020 on hyperbolic-20 -- modest, because short routes
+   accumulate little error. On Eagle-127 (25-SWAP route) it recovers 0.113
+   (0.820 → 0.934), the largest gain measured, because there is far more
+   error to detect. The price also grows with chip size: +1 SWAP / +4 CX /
+   +4-5 two-qubit depth on the small chips vs +5 SWAPs / +4 CX / +9
+   two-qubit depth on Eagle-127, discarding 9-21% of shots. The overhead
+   varies because the ancilla is placed at the qubit minimizing total
+   distance to the Bell endpoints (`_best_ancilla_spot`); on bigger chips
+   that qubit is farther from the endpoints, so reaching it costs more
+   SWAPs. Shorter routes still help more per unit cost -- but on long
+   routes, detection is worth budgeting for.
 
 6. **Forward-looking: ~N/log N long-range shortcut couplers.** Our data
    covers planar graphs only, but the mechanism is clear -- diameter is set

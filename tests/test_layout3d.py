@@ -14,7 +14,7 @@ from backend.services import topology_service
 
 def _all_topos():
     return [StarTopology(), TShapeTopology(), HeavyHexPatch(1, 2),
-            HyperbolicTiling(17)]
+            HyperbolicTiling(20)]
 
 
 def test_positions_length_finite_and_deterministic():
@@ -37,7 +37,7 @@ def test_flat_chips_have_zero_z():
 
 
 def test_hyperbolic_lies_on_hyperboloid():
-    L = layout_3d(HyperbolicTiling(17))
+    L = layout_3d(HyperbolicTiling(20))
     assert L["family"] == "hyperbolic"
     assert L["surface"]["type"] == "hyperboloid"
     # x^2 + y^2 - (z-1)^2 == -1 (hyperboloid with tip at the origin)

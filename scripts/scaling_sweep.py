@@ -37,10 +37,11 @@ SEED = 42
 FAMILIES = {
     "heavy-hex": [HeavyHexPatch(1, 2), HeavyHexPatch(2, 2), HeavyHexPatch(2, 4),
                   HeavyHexPatch(3, 5), Eagle127Topology()],
-    "hyperbolic": [HyperbolicTiling(17), HyperbolicTiling(40),
-                   HyperbolicTiling(60), HyperbolicTiling(150)],
+    "hyperbolic": [HyperbolicTiling(20), HyperbolicTiling(40),
+                   HyperbolicTiling(60), HyperbolicTiling(125),
+                   HyperbolicTiling(150)],
     "grid": [GridTopology(4, 5), GridTopology(6, 7),
-             GridTopology(8, 8), GridTopology(10, 10)],
+             GridTopology(8, 8), GridTopology(10, 10), GridTopology(11, 12)],
 }
 COLORS = {"heavy-hex": "#d62728", "hyperbolic": "#1f77b4", "grid": "#7f7f7f"}
 

@@ -37,6 +37,10 @@ qubits on a quantum cloud processor?
   absolute fidelities will differ on hardware.
 - Post-selection discards data instead of correcting it; it does not scale
   to large computations, but it fairly compares geometries' error burden.
+- Timing: the syndrome ancilla is measured once, after routing completes.
+  It detects the net error accumulated along the whole route, not errors
+  at each hop. Future work: mid-route syndrome checks that catch errors
+  closer to where they occur.
 - The hyperbolic patch is a finite `{7,3}` tessellation patch
   (built by Poincare-disk reflections), a proposed/simulated coupling
   topology -- not a fabricated chip.

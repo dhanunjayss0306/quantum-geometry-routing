@@ -38,7 +38,7 @@ def main() -> None:
           f"{'Bell pair':<12}{'SWAPs':<7}{'CX':<5}{'depth':<7}{'fidelity~':<10}")
     print("-" * 75)
     for topology in [TShapeTopology(), HeavyHexPatch(1, 2),
-                     HyperbolicTiling(17)]:
+                     HyperbolicTiling(20)]:
         a, b, dist = farthest_pair(topology)
 
         bell = create_bell_measurement_circuit()
