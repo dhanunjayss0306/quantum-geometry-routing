@@ -142,66 +142,176 @@ const TABS = [
   ["dashboard", "Dashboard"],
   ["topologies", "Topologies"],
   ["3d", "3D View"],
+  ["cost", "Cloud cost"],
+  ["hardware", "Real hardware"],
   ["run", "Run"],
 ];
 
-/** Real-hardware validation panel: the t-shape case run on ibm_fez. */
-function HardwarePanel({ hw, simNoisyF }) {
-  if (!hw) return null;
-  const corr = hw.correlators || {};
-  const depth = hw.transpiled_depth || {};
-  const d2 = hw.transpiled_two_qubit_depth || {};
+/** Cloud-cost model: depth ratio as an UPPER BOUND on relative QPU cost.
+ *  Depths come from the scaling data; the sensitivity rows are the model's
+ *  own formula rel(s) = s + ratio*(1-s). Nothing hard-coded. */
+function CostPanel({ scaling }) {
+  const hh = (scaling || []).find((s) => s.topology === "heavy-hex-127");
+  const hyp = (scaling || []).find((s) => s.topology === "hyperbolic-127");
+  const dHH = hh ? Number(hh.depth_2q) : null;
+  const dHyp = hyp ? Number(hyp.depth_2q) : null;
+  if (dHH == null || dHyp == null || !dHyp) return null;
+  const ratio = dHH / dHyp;
+  const shares = [0, 0.5, 0.9, 0.99];
+  const rel = (s) => s + ratio * (1 - s);
+
   return (
-    <div className="panel" style={{ borderLeft: "4px solid #0e7c8c" }}>
-      <h2>Real hardware run <span className="tag req">ibm_fez</span></h2>
+    <div className="panel">
+      <h2>Cloud-cost model <span className="tag supp">model, not a bill</span></h2>
       <p className="sub">
-        The t-shape Bell-routing case ran on a real 156-qubit IBM Heron QPU
-        (not a simulator) to spot-check the noise model against real
-        hardware — one small case.
+        On time-billed quantum cloud, deeper circuits bill more QPU time.
+        Size-matched at 127 qubits, the heavy-hex layout needs two-qubit
+        depth {dHH} vs hyperbolic's {dHyp}:
       </p>
-      <div className="metric-strip" role="region" aria-label="Hardware vs simulation">
+      <div className="metric-strip" role="region" aria-label="Depth ratio upper bound">
         <div className="metric-cell">
-          <span className="k">Hardware fidelity</span>
-          <span className="v" style={{ fontSize: 28 }}>
-            {Number(hw.fidelity_phi_plus).toFixed(3)}
-            {hw.fidelity_stderr != null && (
-              <span style={{ fontSize: 16 }}> ± {Number(hw.fidelity_stderr).toFixed(3)}</span>
-            )}
-          </span>
+          <span className="k">Depth ratio</span>
+          <span className="v" style={{ fontSize: 28 }}>{ratio.toFixed(2)}×</span>
+          <span className="u">upper bound, pure depth-proportional model</span>
         </div>
         <div className="metric-cell">
-          <span className="k">Simulated noisy fidelity</span>
-          <span className="v" style={{ fontSize: 28 }}>
-            {simNoisyF != null ? simNoisyF.toFixed(4) : "n/a"}
-          </span>
+          <span className="k">heavy-hex-127 two-qubit depth</span>
+          <span className="v">{dHH}</span>
         </div>
         <div className="metric-cell">
-          <span className="k">Correlators</span>
-          <span className="v mono" style={{ fontSize: 15 }}>
-            XX {Number(corr.XX).toFixed(3)} · YY {Number(corr.YY).toFixed(3)} · ZZ {Number(corr.ZZ).toFixed(3)}
-          </span>
+          <span className="k">hyperbolic-127 two-qubit depth</span>
+          <span className="v">{dHyp}</span>
         </div>
       </div>
-      <ul className="small" style={{ paddingLeft: 20, margin: "12px 0" }}>
-        <li><span className="mono">job {hw.job_id}</span> — status {hw.job_status}, {hw.shots_per_circuit} shots × XX/YY/ZZ</li>
-        <li>Submitted {hw.submitted_utc} · completed {hw.completed_utc}</li>
-        <li>Bell pair on farthest qubits ({(hw.bell_pair || []).join(", ")}, {hw.graph_distance} hops); physical qubits [{(hw.t_shape_physical_qubits || []).join(", ")}]</li>
-        <li>Transpiled depth {depth.ZZ} (two-qubit depth {d2.ZZ}) per correlator circuit</li>
-        <li>Consistent with the simulated noisy value within shot noise for this one case — a spot-check, not proof the noise model fits other chips or topologies.</li>
+      <h3 style={{ marginTop: 20 }}>Fixed overhead shrinks the real ratio</h3>
+      <p className="sub">
+        Each shot also carries fixed overhead (readout, reset, repetition).
+        If a share <span className="mono">s</span> of per-shot time is fixed,
+        the relative cost becomes <span className="mono">s + ratio·(1−s)</span>:
+      </p>
+      <table className="data">
+        <thead>
+          <tr><th>Overhead share s</th><th>Relative cost (heavy-hex / hyperbolic)</th></tr>
+        </thead>
+        <tbody>
+          {shares.map((s) => (
+            <tr key={s}>
+              <td className="mono">{s}{s === 0 ? " (no overhead)" : s === 0.99 ? " (overhead dominates)" : ""}</td>
+              <td className="mono">{rel(s).toFixed(2)}×</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <ul className="small" style={{ paddingLeft: 20, margin: "12px 0 0" }}>
+        <li>Our real <span className="mono">ibm_fez</span> job billed 4 s of QPU time for 6000 shots — fixed overhead dominates on real jobs, so the actual ratio sits well below the {ratio.toFixed(2)}× upper bound.</li>
+        <li>Cost units are model quantities. This is not a prediction of any provider's bill: actual cost depends on billing model (time vs per-shot), device timing, parallelism, and pricing.</li>
+        <li>Full model and sensitivity table: <span className="mono">docs/cloud_cost.md</span>, <span className="mono">results/tables/cloud_cost.csv</span>.</li>
       </ul>
-      {hw.screenshot && (
-        <figure style={{ margin: "12px 0 0" }}>
-          <img
-            src={hw.screenshot}
-            alt="IBM Quantum Platform job page showing the completed ibm_fez run"
-            style={{ maxWidth: "100%", border: "1px solid var(--rule-strong)", borderRadius: 6 }}
-          />
-          <figcaption className="muted small">
-            Screenshot: the completed job on the IBM Quantum Platform, matching the record above.
-          </figcaption>
-        </figure>
-      )}
     </div>
+  );
+}
+
+/** Real-hardware validation page: the t-shape case run on ibm_fez.
+ *  Full provenance plus the explicit caveat that the hardware circuit
+ *  differs from the abstract simulated pipeline. */
+function HardwarePage({ hw, simNoisyF }) {
+  if (!hw) return (
+    <main><div className="panel">
+      <h2>Real hardware</h2>
+      <p className="muted">No hardware record loaded.</p>
+    </div></main>
+  );
+  const corr = hw.correlators || {};
+  const cz = hw.transpiled_ops && hw.transpiled_ops.ZZ ? hw.transpiled_ops.ZZ.cz : null;
+  const d2 = hw.transpiled_two_qubit_depth || {};
+  return (
+    <main>
+      <div className="panel" style={{ borderLeft: "4px solid #0e7c8c" }}>
+        <h2>Real hardware run <span className="tag req">ibm_fez</span></h2>
+        <p className="sub">
+          The t-shape Bell-routing case ran on a real 156-qubit IBM Heron r2
+          QPU (not a simulator) to spot-check the noise model against real
+          hardware — one small case.
+        </p>
+        <div className="metric-strip" role="region" aria-label="Hardware vs simulation">
+          <div className="metric-cell">
+            <span className="k">Hardware fidelity</span>
+            <span className="v" style={{ fontSize: 28 }}>
+              {Number(hw.fidelity_phi_plus).toFixed(3)}
+              {hw.fidelity_stderr != null && (
+                <span style={{ fontSize: 16 }}> ± {Number(hw.fidelity_stderr).toFixed(3)}</span>
+              )}
+            </span>
+            <span className="u">± is 1σ shot noise</span>
+          </div>
+          <div className="metric-cell">
+            <span className="k">Simulated noisy fidelity</span>
+            <span className="v" style={{ fontSize: 28 }}>
+              {simNoisyF != null ? simNoisyF.toFixed(4) : "n/a"}
+            </span>
+            <span className="u">Aer, same noise model</span>
+          </div>
+          <div className="metric-cell">
+            <span className="k">Correlators</span>
+            <span className="v mono" style={{ fontSize: 15 }}>
+              XX {Number(corr.XX).toFixed(3)} · YY {Number(corr.YY).toFixed(3)} · ZZ {Number(corr.ZZ).toFixed(3)}
+            </span>
+            <span className="u">{hw.shots_per_circuit} shots each</span>
+          </div>
+        </div>
+        <p className="small" style={{ marginTop: 12 }}>
+          Consistent with the simulated noisy value within shot noise for
+          this one case — a spot-check, not proof the noise model fits other
+          chips or topologies.
+        </p>
+      </div>
+
+      <div className="panel">
+        <h2>Provenance</h2>
+        <ul className="small" style={{ paddingLeft: 20, margin: "12px 0" }}>
+          <li>Backend: <span className="mono">{hw.backend}</span> — 156-qubit IBM Heron r2</li>
+          <li>Job <span className="mono">{hw.job_id}</span> — status {hw.job_status}</li>
+          <li>Submitted {hw.submitted_utc} · completed {hw.completed_utc}</li>
+          <li>{hw.shots_per_circuit} shots × XX/YY/ZZ correlator circuits (6000 total)</li>
+          <li>Bell pair on farthest qubits ({(hw.bell_pair || []).join(", ")}, {hw.graph_distance} hops)</li>
+        </ul>
+      </div>
+
+      <div className="panel">
+        <h2>What actually ran on the chip</h2>
+        <p className="sub">
+          The hardware circuit is not a copy of the simulated benchmark
+          circuit — it is the t-shape case transpiled for the real device:
+        </p>
+        <ul className="small" style={{ paddingLeft: 20, margin: "12px 0" }}>
+          <li>Physical qubits [{(hw.t_shape_physical_qubits || []).join(", ")}]</li>
+          <li>{cz != null ? `${cz} CZ gates` : "7 CZ gates"} per correlator circuit, two-qubit depth {d2.ZZ}</li>
+          <li>The simulated t-shape benchmark uses the abstract topology/routing model instead.</li>
+        </ul>
+        <p className="small">
+          So this run is a <em>validation spot-check</em> of the noise model
+          on one small case — not an exact reproduction of the simulated
+          pipeline, and not validation of the 127-qubit or hyperbolic
+          results (those are simulation only).
+        </p>
+      </div>
+
+      {hw.screenshot && (
+        <div className="panel">
+          <h2>Job record</h2>
+          <figure style={{ margin: "12px 0 0" }}>
+            <img
+              src={hw.screenshot}
+              alt="IBM Quantum Platform job page showing the completed ibm_fez run"
+              style={{ maxWidth: "100%", border: "1px solid var(--rule-strong)", borderRadius: 6 }}
+            />
+            <figcaption className="muted small">
+              Screenshot: the completed job on the IBM Quantum Platform, matching the record above.
+            </figcaption>
+          </figure>
+        </div>
+      )}
+    </main>
   );
 }
 
@@ -280,10 +390,6 @@ export default function App() {
         <main>
           <HeadlineGroups results={results} scaling={scaling} />
           <FidelityBars results={results} />
-          <HardwarePanel
-            hw={hardware}
-            simNoisyF={(findRow(results, "t-shape", "noisy") || {}).fidelity}
-          />
           <div className="panel">
             <h2>9-case experiment matrix</h2>
             <p className="sub">
@@ -324,6 +430,17 @@ export default function App() {
       )}
       {tab === "3d" && topologies.length > 0 && (
         <Topology3DTab topologies={topologies} results={results} />
+      )}
+      {tab === "cost" && (
+        <main>
+          <CostPanel scaling={scaling} />
+        </main>
+      )}
+      {tab === "hardware" && (
+        <HardwarePage
+          hw={hardware}
+          simNoisyF={(findRow(results, "t-shape", "noisy") || {}).fidelity}
+        />
       )}
       {tab === "run" && (
         <main>
