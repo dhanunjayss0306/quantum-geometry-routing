@@ -1,12 +1,12 @@
 # This file describes how to cite this repository. Author names confirmed
-# 2026-10-03; the DOI stays commented until Zenodo issues one.
+# 2026-10-03; dataset DOI issued by Zenodo on publication.
 cff-version: 1.2.0
 title: "Quantum Geometry Routing: Bell-state routing benchmark across quantum chip topologies"
 message: "If you use this software or dataset, please cite it as below."
 type: software
 license: MIT
 repository-code: "https://github.com/dhanunjayss0306/quantum-geometry-routing"
-# doi: 10.5281/zenodo.XXXXXXX
+doi: 10.5281/zenodo.23123273
 authors:
   - family-names: "Reddy"
     given-names: "Dhanunjay"

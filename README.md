@@ -1,5 +1,7 @@
 # Quantum Geometry Routing
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23123273.svg)](https://doi.org/10.5281/zenodo.23123273)
+
 **Track 4: Geometry-Aware Quantum Cloud Challenge** (IBM Qiskit Fall Fest 2026)
 
 A reproducible benchmark of Bell-state routing cost across quantum-chip

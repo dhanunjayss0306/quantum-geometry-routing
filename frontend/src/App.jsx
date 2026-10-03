@@ -427,7 +427,7 @@ function ZenodoPage() {
   return (
     <main>
       <div className="panel">
-        <h2>Zenodo archive <span className="tag supp">DOI pending</span></h2>
+        <h2>Zenodo archive <span className="tag req">published</span></h2>
         <p className="sub">
           Zenodo is a free research archive (run by CERN). We put a frozen
           copy of our dataset there so anyone — including the judges — can
@@ -435,9 +435,10 @@ function ZenodoPage() {
           the living code; Zenodo holds the citable snapshot.
         </p>
         <p className="small">
-          <strong>Status:</strong> not published yet. The dataset below is
-          packed and ready — publishing happens on zenodo.org and takes a
-          few minutes.
+          <strong>Status:</strong> published on 3 Oct 2026.{" "}
+          <a href="https://doi.org/10.5281/zenodo.23123273">
+            doi.org/10.5281/zenodo.23123273
+          </a>
         </p>
         <a
           className="btn"
@@ -464,19 +465,16 @@ function ZenodoPage() {
           <li>Authors: Dhanunjay Reddy, Mohit Sai Satyanarayana, Leela Prasad</li>
           <li>License: CC-BY-4.0 for the dataset (code is MIT)</li>
           <li>Code: <span className="mono">github.com/dhanunjayss0306/quantum-geometry-routing</span></li>
-          <li>DOI: issued when the record is published</li>
+          <li>DOI: <a href="https://doi.org/10.5281/zenodo.23123273">10.5281/zenodo.23123273</a></li>
         </ul>
       </div>
       <div className="panel">
-        <h2>Publishing checklist</h2>
-        <ol className="small" style={{ paddingLeft: 20, margin: "12px 0" }}>
-          <li>Log in to zenodo.org (free; GitHub login works).</li>
-          <li>New upload → upload the zip (button above).</li>
-          <li>Paste the title and description; add the three author names.</li>
-          <li>License CC-BY-4.0; add the keywords.</li>
-          <li>Link the GitHub repo as a related identifier.</li>
-          <li>Review everything, then Publish. The DOI is issued on publish.</li>
-        </ol>
+        <h2>Published</h2>
+        <p className="small" style={{ margin: "12px 0" }}>
+          The record is live on Zenodo with the file, metadata, and author
+          names above. To publish a new version later, upload a new zip to
+          the same record on zenodo.org — the DOI stays the same.
+        </p>
       </div>
     </main>
   );
