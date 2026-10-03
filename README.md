@@ -5,6 +5,19 @@
 All results below are from Qiskit Aer simulation (AerSimulator). Nothing was
 run on a QPU.
 
+```
+topology -> farthest pair -> transpiler SWAPs -> two-qubit gate exposure -> noisy fidelity
+protection -> fidelity up, extra gates, discarded shots -> yield down
+```
+
+How it works in 20 seconds:
+
+1. Research question: which coupling-graph geometry keeps a worst-case Bell-state route short?
+2. Farthest-pair routing: prepare |Phi+> between each chip's two most distant qubits, route with the transpiler.
+3. Ideal / noisy / protected simulation: same noise model everywhere; protection is ancilla syndrome detection with post-selection.
+4. Measured per case: SWAP count, two-qubit depth, Bell-state fidelity, yield.
+5. Geometry comparison: T (5q) vs Eagle-style heavy-hex (127q) vs proposed hyperbolic {7,3} (20q), plus size-matched rows.
+
 ## Problem
 
 When a quantum processor must entangle two distant qubits, the transpiler
@@ -24,8 +37,9 @@ fidelity F = (1 + ⟨XX⟩ − ⟨YY⟩ + ⟨ZZ⟩)/4. Details: `docs/methodolog
 ## Topologies
 
 - **t-shape** (5 qubits): 2016-era reference layout.
-- **heavy-hex-127** (127 qubits): the real IBM Eagle coupling map, loaded
-  from a static edge list extracted from FakeSherbrooke. This is the
+- **heavy-hex-127** (127 qubits): 127-qubit IBM Eagle-style coupling map
+  (static edge list derived from the Qiskit FakeSherbrooke fake backend),
+  loaded from a static edge list extracted from FakeSherbrooke. This is the
   IBM-style row of the matrix, per the Track 4 spec.
 - **hyperbolic-20** (20 qubits): finite patch of the `{7,3}` tessellation,
   built by reflecting the fundamental heptagon across geodesic edges in the
@@ -34,6 +48,11 @@ fidelity F = (1 + ⟨XX⟩ − ⟨YY⟩ + ⟨ZZ⟩)/4. Details: `docs/methodolog
 - **heavy-hex-21** (21 qubits, supplementary): subdivided-honeycomb patch in
   IBM's heavy-hex style, kept as a size-matched reference for the ~20-qubit
   comparison.
+
+Topology tiers: **required** (t-shape, heavy-hex-127, hyperbolic-20: the
+9-case matrix), **supplementary** (heavy-hex-21, hyperbolic-127:
+size-matched rows), **exploratory** (star, heavy-hex-35, hyperbolic-43:
+Run tab only).
 
 ## 9-case matrix
 
@@ -53,12 +72,13 @@ Supplementary size-matched row:
 |---|---|---|---|---|---|---|---|---|
 | heavy-hex-21 | 1.0000 | 0.8938 | 0.9208 | 0.881 | 9 | +1 | 6 / 6 / 13 | +7 |
 
-The required matrix follows the Track 4 spec (5-qubit T, real 127-qubit
-Eagle map, hyperbolic patch), so its rows have different qubit counts
-(5 / 127 / 20) and the fidelity differences between rows partly reflect
-size, not just geometry. Size-matched comparisons are in the
-supplementary heavy-hex-21 row above, the scaling table, and the seed
-sweep.
+The required matrix follows the Track 4 spec (5-qubit T, 127-qubit IBM
+Eagle-style coupling map, hyperbolic patch), so its rows have different
+qubit counts (5 / 127 / 20) and the fidelity differences between rows
+partly reflect size, not just geometry. Case mapping: Cases 1-3 t-shape,
+Cases 4-6 heavy-hex-127, Cases 7-9 hyperbolic-20 (ideal / noisy /
+protected each). Size-matched comparisons are in the supplementary
+heavy-hex-21 row above, the scaling table, and the seed sweep.
 
 ## Noise
 
@@ -117,9 +137,10 @@ Sizes are near-matched, not identical; exact counts are shown.
 
 ## Results
 
-- The IBM-style matrix row is the real 127-qubit Eagle map (25 SWAPs on its
-  worst-case route); the `{7,3}` patch needs 6 SWAPs at 20 qubits and 14 at
-  127 qubits (diameters 7 and 15 vs 10 and 26).
+- The IBM-style matrix row is the 127-qubit IBM Eagle-style coupling map
+  (static edge list derived from the Qiskit FakeSherbrooke fake backend;
+  25 SWAPs on its worst-case route); the `{7,3}` patch needs 6 SWAPs at
+  20 qubits and 14 at 127 qubits (diameters 7 and 15 vs 10 and 26).
 - At near-matched 127 qubits: diameter 15 (`{7,3}`) vs 21 (grid, 132q) vs
   26 (Eagle-127); noisy fidelity 0.863 vs 0.839 vs 0.814.
 - Syndrome protection recovers the most fidelity where the route is
@@ -169,9 +190,10 @@ python3 scripts/tiebreaker.py            # Bell state routed on the 5-qubit star
 python3 scripts/compare_routing.py       # routing-only comparison (ideal)
 python3 scripts/run_all_cases.py         # 9 required + 3 supplementary -> experiments/results/
 python3 scripts/scaling_sweep.py         # 15 chips, 20->152 qubits -> results/tables/
+python3 scripts/export_static_data.py    # static snapshot for the frontend -> frontend/public/data/
 python3 scripts/seed_sweep.py            # seed robustness -> results/tables/seed_sweep.csv
 python3 scripts/render_3d_figure.py      # static 3D figure -> results/figures/
-python3 -m pytest tests/ -q              # 30 tests
+python3 -m pytest tests/ -q              # 35 tests
 
 # API + dashboard (two terminals):
 uvicorn backend.main:app --port 8765       # http://localhost:8765/docs

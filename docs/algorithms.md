@@ -9,7 +9,8 @@ Input: size parameters. Output: edge list (undirected).
 - T-shape: 5-qubit reference (edges (0,1),(1,2),(1,3),(3,4)).
 - Heavy-hex: honeycomb via `networkx.hexagonal_lattice_graph`, then
   subdivide every edge with a new node (this is exactly IBM's heavy-hex).
-  `Eagle127Topology` instead loads the real 127-qubit Eagle coupling map
+  `Eagle127Topology` instead loads the 127-qubit IBM Eagle-style coupling map
+  (static edge list derived from the Qiskit FakeSherbrooke fake backend)
   from a static edge list (extracted once from FakeSherbrooke).
 - Hyperbolic: a finite patch of the `{7,3}` tessellation, built by
   reflecting the fundamental heptagon across its geodesic edges in the

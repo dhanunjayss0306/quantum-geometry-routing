@@ -8,7 +8,11 @@ from quantum.topologies.heavy_hex import HeavyHexPatch, Eagle127Topology
 from quantum.topologies.hyperbolic import HyperbolicTiling
 from quantum.topologies.layout3d import layout_3d
 from algorithms.experiment_matrix import farthest_pair
-from backend.config import ALLOWED_TOPOLOGIES
+from backend.config import (ALLOWED_TOPOLOGIES, REQUIRED_TOPOLOGIES,
+                            SUPPLEMENTARY_TOPOLOGIES)
+
+TIERS = {name: "required" for name in REQUIRED_TOPOLOGIES}
+TIERS.update({name: "supplementary" for name in SUPPLEMENTARY_TOPOLOGIES})
 
 _BUILDERS = {
     "t-shape": TShapeTopology,
@@ -18,6 +22,7 @@ _BUILDERS = {
     "heavy-hex-127": Eagle127Topology,
     "hyperbolic-20": lambda: HyperbolicTiling(20),
     "hyperbolic-43": lambda: HyperbolicTiling(40),
+    "hyperbolic-127": lambda: HyperbolicTiling(125),
 }
 
 # Topologies never change at runtime; cache the (expensive) 3D details.
@@ -49,6 +54,7 @@ def topology_detail(name: str) -> dict:
             "route": route,
             "diameter": nx.diameter(topo.graph()),
             "family": layout["family"],
+            "tier": TIERS.get(topo.name, "exploratory"),
         }
     return _DETAIL_CACHE[name]
 

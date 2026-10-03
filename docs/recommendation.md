@@ -1,24 +1,23 @@
-# Architectural recommendation: coupling-graph features worth testing next
+# Design implications from the benchmark
 
-**Bottom line:** for the workload we tested -- routing a Bell state between
-a chip's two farthest qubits -- the coupling graph's diameter scaling is the
-strongest predictor of cost. We measured three families from ~20 to 152
-qubits. The hyperbolic `{7,3}` patch had the smallest diameter at every
-measured size, and the industry-standard heavy-hex had a larger diameter
-than even a plain square grid at near-matched sizes.
+**Summary:** For the tested farthest-pair Bell-routing workload, lower graph
+diameter was strongly associated with fewer SWAPs and higher noisy fidelity
+under the simulated noise model.
 
-## The evidence (from `results/tables/scaling.csv`)
+## Observed
 
-Sizes are near-matched; exact qubit counts shown.
+Sizes are near-matched; exact qubit counts shown (from
+`results/tables/scaling.csv`).
 
-| Family | ~21q | ~62q | ~127q | Diameter law (fit) |
+| Family | ~21q | ~62q | ~127q | Diameter growth |
 |---|---|---|---|---|
 | heavy-hex (IBM Eagle-style) | 21q: d=10 | 63q: d=18 | 127q: d=26 | ~2.3·√N |
 | square grid (flat reference) | 20q: d=7 | 64q: d=14 | 132q: d=21 | ~1.8·√N |
 | hyperbolic `{7,3}` (proposed) | 20q: d=7 | 61q: d=11 | 127q: d=15 | consistent with sub-√N growth over the 20-152q range measured; five points from one growth pattern are not enough to establish a law |
 
-Routing a Bell state across the diameter (worst case) needs `diameter − 1`
-SWAPs, and noisy fidelity falls with SWAP count. At near-matched 127
+For the farthest-pair routing procedure used in this benchmark, the measured
+SWAP count follows the graph distance closely (about diameter − 1), and
+noisy fidelity decreased as SWAP count increased. At near-matched 127
 qubits:
 
 - heavy-hex-127: 25 SWAPs → fidelity **0.814**
@@ -29,17 +28,21 @@ Syndrome protection on heavy-hex-127 (9-case matrix): fidelity 0.820 →
 0.934, at a cost of +5 SWAPs, +4 CX, +9 two-qubit depth, and 20.5% of shots
 discarded (yield 0.795).
 
-## Recommended coupling-graph features
+## Interpretation
 
-1. **Max degree 3.** Heavy-hex proves degree 3 suffices for a working chip;
-   the grid's degree 4 buys little (it still scales as √N) while each extra
-   coupler adds crosstalk and frequency-collision risk. Target exactly 3.
+1. **Max degree 3 is a feasible target.** Heavy-hex chips operate with
+   maximum degree 3, so degree 3 is a feasible target; this benchmark did
+   not test whether lower or higher degree changes the result. The grid's
+   degree 4 buys little diameter improvement (it still scales as √N) while
+   each extra coupler adds crosstalk and frequency-collision risk.
 
-2. **Diameter scaling strictly better than √N; target logarithmic.**
-   Heavy-hex's ~2.3·√N is *worse* than a plain grid's ~1.8·√N -- the
-   subdivided honeycomb's degree-2 "wire" qubits stretch paths without
-   adding connectivity. Any future layout should beat the grid, not just
-   match it. Our `{7,3}` patch is the only family measured here that does.
+2. **Slower diameter growth beats the grid.** In the tested range, the
+   `{7,3}` family showed slower diameter growth than the square grid and
+   heavy-hex; whether growth is logarithmic is not established by five
+   points from one growth pattern. Heavy-hex's ~2.3·√N is worse than a
+   plain grid's ~1.8·√N -- the subdivided honeycomb's degree-2 "wire"
+   qubits stretch paths without adding connectivity. Our `{7,3}` patch is
+   the only family measured here that beats the grid.
 
 3. **No long degree-2 chains.** Every degree-2 qubit is a wire: it adds a hop
    without a routing choice. Heavy-hex is full of them (the "heavy" edge
@@ -68,10 +71,15 @@ discarded (yield 0.795).
    SWAPs. Shorter routes still help more per unit cost -- but on long
    routes, detection is worth budgeting for.
 
-6. **Forward-looking: ~N/log N long-range shortcut couplers.** Our data
-   covers planar graphs only, but the mechanism is clear -- diameter is set
-   by the longest shortest path, and a few non-planar shortcuts collapse it
-   (small-world effect). Worth simulating next; not yet measured.
+## Future hypotheses
+
+- **~N/log N long-range shortcut couplers.** Our data covers planar graphs
+  only, but the mechanism is clear -- diameter is set by the longest
+  shortest path, and a few non-planar shortcuts collapse it (small-world
+  effect). Worth simulating next; not yet measured.
+- A `{7,3}` patch is a planar graph, so it is manufacturable as a coupler
+  layout in principle -- but no foundry builds heptagonal coupler graphs
+  today, and degree-3 vertices at non-standard angles need process work.
 
 ## Caveats
 
@@ -80,8 +88,5 @@ discarded (yield 0.795).
   differ on hardware.
 - Largest patch measured is 152 qubits; the measured trends suggest the
   gap would widen at larger N, but that is extrapolation, not measurement.
-- A `{7,3}` patch is a planar graph, so it is manufacturable as a coupler
-  layout in principle -- but no foundry builds heptagonal coupler graphs
-  today, and degree-3 vertices at non-standard angles need process work.
 - Shot counts (1000/sweep point) leave ±0.01--0.02 statistical wobble in
   fidelity; diameter and SWAP counts are exact.

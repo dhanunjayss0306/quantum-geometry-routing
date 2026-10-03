@@ -1,5 +1,5 @@
-# Pinned to the exact versions tested on 2026-10-03 (Python 3.12, Linux).
-# Your laptop runs the same: qiskit 2.5.2, qiskit-aer 0.17.2, networkx 3.7.
+# Pinned to the exact versions tested on 2026-10-03.
+# Tested with Python 3.12 on Linux.
 # Quantum core
 qiskit==2.5.2
 qiskit-aer==0.17.2

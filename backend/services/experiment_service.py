@@ -15,7 +15,9 @@ def run_experiment(req: ExperimentRequest) -> dict:
     if req.condition not in ALLOWED_CONDITIONS:
         raise ValueError(f"unknown condition '{req.condition}'; choose from {CONDITIONS}")
     topology = get_topology(req.topology)
-    return run_case(topology, req.condition, shots=req.shots, seed=req.seed)
+    result = run_case(topology, req.condition, shots=req.shots, seed=req.seed)
+    result["required"] = req.topology in MATRIX_TOPOLOGIES
+    return result
 
 
 def run_all_experiments(shots: int = 2000, seed: int = 42) -> list:

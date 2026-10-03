@@ -1,7 +1,7 @@
 """Run the experiment matrix and generate all submission artifacts.
 
 The 9 required cases (Track 4: 3 processors x ideal/noisy/protected):
-  t-shape, heavy-hex-127 (real Eagle map), hyperbolic-20
+  t-shape, heavy-hex-127 (Eagle-style map), hyperbolic-20
 plus 3 supplementary size-matched cases for heavy-hex-21.
 
 Outputs:
@@ -34,7 +34,8 @@ from algorithms.experiment_matrix import run_matrix, CONDITIONS
 
 SHOTS = 2000
 SEED = 42
-# Required 9: the IBM-style row is the real 127-qubit Eagle coupling map,
+# Required 9: the IBM-style row is the 127-qubit IBM Eagle-style coupling map
+# (static edge list derived from the Qiskit FakeSherbrooke fake backend),
 # per the Track 4 spec ("127-qubit heavy-hex snippet or fake hardware").
 # HyperbolicTiling(20): the growth loop adds whole heptagons and stops once
 # the target is reached, so a target of 20 yields exactly the 20-qubit patch.

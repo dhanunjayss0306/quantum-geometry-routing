@@ -4,6 +4,12 @@
 Which coupling-graph geometry minimizes the cost of entangling distant
 qubits on a quantum cloud processor?
 
+## Provenance
+The 127-qubit IBM Eagle-style coupling map was extracted once from the
+Qiskit FakeSherbrooke fake backend and stored as
+`quantum/topologies/eagle127_edges.json`. All results are Qiskit Aer
+simulation; no IBM hardware was accessed.
+
 ## Procedure (per case)
 1. **Generate** the Bell state |Phi+> on 2 logical qubits (H + CNOT).
 2. **Choose** the topology's two farthest-apart physical qubits

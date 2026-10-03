@@ -42,7 +42,7 @@ def test_heavy_hex_patch_35():
 
 
 def test_eagle_127():
-    """The real IBM Eagle map: 127 qubits, heavy-hex structure."""
+    """The 127-qubit IBM Eagle-style coupling map: 127 qubits, heavy-hex structure."""
     t = Eagle127Topology()
     _check(t, 127)
     g = t.graph()

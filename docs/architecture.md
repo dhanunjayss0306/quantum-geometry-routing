@@ -26,6 +26,13 @@ experiment controls  --JSON-->    run controller    -->      routing, noise,
   **3D** tab (`components/Topology3D.jsx`, three.js) renders each chip's
   coupling graph in rotatable 3D from the API's `positions3d` field; layouts
   themselves live in `quantum/topologies/layout3d.py`, never in the frontend.
+  `scripts/export_static_data.py` writes `frontend/public/data/*.json` from
+  the same API functions, so the site works without the backend.
+
+Topologies have tiers (`backend/config.py`): required (the 9-case matrix),
+supplementary (size-matched rows), exploratory (Run tab only). `GET
+/api/results` returns rows in matrix order with a `case` field (1-9 for
+required, null for supplementary).
 - `scripts/`: one-command runners (`tiebreaker.py`, `run_all_cases.py`,
   `render_3d_figure.py` for a static matplotlib 3D PNG).
 - `experiments/`: configs in, results out.

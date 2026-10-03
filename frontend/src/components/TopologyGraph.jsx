@@ -52,37 +52,59 @@ export default function TopologyGraph({ topology, highlight = [] }) {
     () => layoutRings(topology.num_qubits, topology.edges),
     [topology]
   );
+  // Labels on by default for small graphs; off for >40 qubits (they overlap).
+  const [showLabels, setShowLabels] = React.useState(topology.num_qubits <= 40);
   const hl = new Set(highlight);
+  const endpoints = new Set(topology.bell_pair || []);
+  const big = topology.num_qubits > 40;
+  const nodeR = big ? 3.2 : 6;
+  const hlR = big ? 5.5 : 9;
+  const edgeW = big ? 0.7 : 1.2;
+  const fontSize = big ? 6.5 : 8;
+  const label = (n) => showLabels || endpoints.has(Number(n));
   return (
-    <svg width={W} height={H} className="topo-svg" role="img"
-         aria-label={`Coupling graph of ${topology.num_qubits} qubits`}>
-      {topology.edges.map(([a, b], i) => (
-        <line
-          key={i}
-          x1={pos[a][0]}
-          y1={pos[a][1]}
-          x2={pos[b][0]}
-          y2={pos[b][1]}
-          stroke={hl.has(a) && hl.has(b) ? "#a85f1d" : "#b9ae97"}
-          strokeWidth={hl.has(a) && hl.has(b) ? 2.5 : 1.2}
+    <div>
+      <label className="check small" style={{ marginBottom: 6 }}>
+        <input
+          type="checkbox"
+          checked={showLabels}
+          onChange={(e) => setShowLabels(e.target.checked)}
         />
-      ))}
-      {Object.entries(pos).map(([n, [x, y]]) => (
-        <g key={n}>
-          <circle
-            cx={x}
-            cy={y}
-            r={hl.has(Number(n)) ? 9 : 6}
-            fill={hl.has(Number(n)) ? "#a85f1d" : "#4e7a77"}
-            stroke="#f7f4ee"
-            strokeWidth={1.5}
+        Show qubit labels
+      </label>
+      <svg width={W} height={H} className="topo-svg" role="img"
+           aria-label={`Coupling graph of ${topology.num_qubits} qubits`}>
+        {topology.edges.map(([a, b], i) => (
+          <line
+            key={i}
+            x1={pos[a][0]}
+            y1={pos[a][1]}
+            x2={pos[b][0]}
+            y2={pos[b][1]}
+            stroke={hl.has(a) && hl.has(b) ? "#a85f1d" : "#b9ae97"}
+            strokeWidth={hl.has(a) && hl.has(b) ? edgeW + 1.3 : edgeW}
           />
-          <text x={x} y={y + 3.5} textAnchor="middle" fontSize={8} fill="#1e1b16"
-                fontFamily="IBM Plex Mono, monospace">
-            {n}
-          </text>
-        </g>
-      ))}
-    </svg>
+        ))}
+        {Object.entries(pos).map(([n, [x, y]]) => (
+          <g key={n}>
+            <circle
+              cx={x}
+              cy={y}
+              r={hl.has(Number(n)) ? hlR : nodeR}
+              fill={hl.has(Number(n)) ? "#a85f1d" : "#4e7a77"}
+              stroke="#f7f4ee"
+              strokeWidth={1.5}
+            />
+            {label(n) && (
+              <text x={x} y={y + fontSize * 0.35} textAnchor="middle"
+                    fontSize={fontSize} fill="#1e1b16"
+                    fontFamily="IBM Plex Mono, monospace">
+                {n}
+              </text>
+            )}
+          </g>
+        ))}
+      </svg>
+    </div>
   );
 }

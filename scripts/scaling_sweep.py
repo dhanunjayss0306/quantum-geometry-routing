@@ -1,7 +1,8 @@
 """Scaling sweep: diameter / SWAPs / fidelity vs qubit count, per family.
 
-Families: heavy-hex patches (+ the real Eagle-127), hyperbolic {7,3} patches,
-and the 2D square grid as the flat reference.
+Families: heavy-hex patches (+ the 127-qubit IBM Eagle-style coupling map,
+derived from the Qiskit FakeSherbrooke fake backend), hyperbolic {7,3}
+patches, and the 2D square grid as the flat reference.
 
 Outputs:
   results/tables/scaling.csv

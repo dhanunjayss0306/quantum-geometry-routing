@@ -44,6 +44,7 @@ class ExperimentResult(BaseModel):
     yield_: float = Field(..., alias="yield")
     shots: int
     seed: int
+    required: bool = True
 
     class Config:
         populate_by_name = True
@@ -60,3 +61,4 @@ class TopologyInfo(BaseModel):
     route: list
     diameter: int
     family: str
+    tier: str

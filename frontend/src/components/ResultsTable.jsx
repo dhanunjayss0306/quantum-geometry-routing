@@ -4,13 +4,12 @@ import React from "react";
 export default function ResultsTable({ results }) {
   if (!results.length)
     return <p className="muted">No saved results yet. Run the matrix first.</p>;
-  const fidColor = (f) =>
-    f >= 0.99 ? "#4e7a77" : f >= 0.9 ? "#a85f1d" : "#b3261e";
   return (
     <div style={{ overflowX: "auto" }}>
       <table className="data">
         <thead>
           <tr>
+            <th>Case</th>
             <th>Topology</th>
             <th>Set</th>
             <th>Condition</th>
@@ -26,6 +25,7 @@ export default function ResultsTable({ results }) {
         <tbody>
           {results.map((r) => (
             <tr key={`${r.topology}-${r.condition}`}>
+              <td className="mono">{r.case != null ? r.case : "supp."}</td>
               <td className="mono">{r.topology}</td>
               <td>
                 <span className={`tag ${r.required === false ? "supp" : "req"}`}>
@@ -42,9 +42,7 @@ export default function ResultsTable({ results }) {
               <td className="num">
                 {r.condition === "protected" ? `+${r.added_cx_count}` : "--"}
               </td>
-              <td className="num" style={{ color: fidColor(r.fidelity), fontWeight: 600 }}>
-                {r.fidelity.toFixed(4)}
-              </td>
+              <td className="num">{r.fidelity.toFixed(4)}</td>
               <td className="num">{r.yield.toFixed(3)}</td>
             </tr>
           ))}

@@ -4,7 +4,7 @@ import Topology3D from "./Topology3D";
 function plainEnglish(t) {
   const hops = t.diameter;
   if (t.family === "hyperbolic")
-    return `${hops} hops on ${t.num_qubits} qubits. The surface curves away, so each ring holds more qubits and distant pairs stay close.`;
+    return `${hops} hops on ${t.num_qubits} qubits. The curved surface is a geometric visualization of the {7,3} graph. The growth in qubits per ring is a property of the simulated hyperbolic graph, not a physical chip surface.`;
   return `${hops} hops on ${t.num_qubits} qubits. The flat layout forces long chains between its most distant qubits.`;
 }
 
@@ -66,7 +66,10 @@ export default function Topology3DTab({ topologies, results }) {
   return (
     <main>
       <div className="panel">
-        <h2>Coupling-graph viewer</h2>
+        <h2>Topology geometry - simulated layout</h2>
+        <p className="sub">
+          Visualization of the coupling graph; not a physical chip layout.
+        </p>
         <p className="sub">
           Geometry from <span className="mono">GET /api/topologies</span>.
           Drag to orbit, scroll or pinch to zoom.
@@ -106,9 +109,10 @@ export default function Topology3DTab({ topologies, results }) {
         </div>
         <p className="muted">
           The amber tube marks the worst-case Bell-pair route, the path that
-          needs the most SWAPs. Flat chips sit on a plane. The hyperbolic chip
-          sits on a curved surface where the qubit count per ring grows
-          exponentially.
+          needs the most SWAPs. Flat chips sit on a plane. The curved surface
+          is a geometric visualization of the {"{7,3}"} graph. The growth in
+          qubits per ring is a property of the simulated hyperbolic graph,
+          not a physical chip surface.
         </p>
       </div>
 

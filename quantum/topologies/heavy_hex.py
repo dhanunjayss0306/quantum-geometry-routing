@@ -1,9 +1,9 @@
-"""Heavy-hex topologies -- the connectivity of modern IBM QPUs.
+"""Heavy-hex-style coupling graphs, used as the IBM-family reference in this
+benchmark.
 
 What "heavy-hex" means: start from a honeycomb (hexagonal) lattice, then put
 one extra qubit in the MIDDLE of every edge. The original corner qubits keep
-degree 3, the new edge qubits have degree 2. That exact pattern is what IBM
-uses on its current chips.
+degree 3, the new edge qubits have degree 2.
 
 Two flavors live here:
 
@@ -11,7 +11,8 @@ Two flavors live here:
    Used for the size-matched matrix variant (~21 qubits) and the scaling
    sweep. Its name always carries its qubit count, e.g. "heavy-hex-35".
 
-2. Eagle127Topology: the REAL 127-qubit IBM Eagle coupling map, extracted
+2. Eagle127Topology: the 127-qubit IBM Eagle-style coupling map (static edge
+   list derived from the Qiskit FakeSherbrooke fake backend), extracted
    once from qiskit-ibm-runtime's FakeSherbrooke backend and stored as a
    static edge list (eagle127_edges.json). No runtime dependency on
    qiskit-ibm-runtime -- the map is just data. 127 nodes, 144 edges,
@@ -72,7 +73,8 @@ HeavyHexTopology = HeavyHexPatch
 
 
 class Eagle127Topology(TopologyBase):
-    """The real IBM Eagle 127-qubit heavy-hex coupling map (static data)."""
+    """The 127-qubit IBM Eagle-style coupling map (static edge list derived
+    from the Qiskit FakeSherbrooke fake backend)."""
 
     name = "heavy-hex-127"
     description = ("127-qubit IBM Eagle heavy-hex coupling map, extracted from "

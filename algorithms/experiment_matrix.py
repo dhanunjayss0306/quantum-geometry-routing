@@ -1,6 +1,6 @@
 """The 9-case experiment matrix.
 
-    3 topologies (t-shape, heavy-hex-21, hyperbolic-20)
+    3 topologies: t-shape (5 qubits); heavy-hex-127 (IBM Eagle-style 127-qubit map); hyperbolic-20 (proposed {7,3} patch). heavy-hex-21 and hyperbolic-127 are supplementary size-matched rows.
   x 3 conditions (ideal, noisy, noisy+protected)
   = 9 experiments.
 
