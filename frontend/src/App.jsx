@@ -211,6 +211,112 @@ function CostPanel({ scaling }) {
   );
 }
 
+/** Interactive cost estimator: pick two cases, set your own assumptions,
+ *  get a dollar estimate. Depths and yields come from the results data;
+ *  every assumption is an editable input, labeled as such. */
+function CostCalculator({ results }) {
+  const rows = (results || []).filter((r) => r.condition !== "ideal");
+  const topoNames = [...new Set(rows.map((r) => r.topology))];
+  const [topA, setTopA] = React.useState("heavy-hex-127");
+  const [condA, setCondA] = React.useState("noisy");
+  const [topB, setTopB] = React.useState("hyperbolic-20");
+  const [condB, setCondB] = React.useState("noisy");
+  const [shots, setShots] = React.useState(1000000);
+  const [price, setPrice] = React.useState(1.6);
+  const [tLayer, setTLayer] = React.useState(0.5);
+  const [tFixed, setTFixed] = React.useState(665);
+
+  const calc = (top, cond) => {
+    const r = rows.find((x) => x.topology === top && x.condition === cond) || rows[0];
+    const d = Number(r.depth_2q) || 0;
+    const y = Number(r.yield) || 1;
+    const sec = shots > 0 ? (shots * (d * tLayer + tFixed)) / 1e6 : 0;
+    const cost = sec * price;
+    const useful = shots * y;
+    return { r, d, y, sec, cost, useful, per1k: useful > 0 ? (cost / useful) * 1000 : 0 };
+  };
+  const A = calc(topA, condA);
+  const B = calc(topB, condB);
+  const sizeNote = A.r.num_qubits !== B.r.num_qubits;
+
+  const num = (v, set) => (
+    <input
+      type="number" min="0" value={v}
+      onChange={(e) => set(Number(e.target.value))}
+      style={{ width: 110 }}
+      className="mono"
+    />
+  );
+
+  return (
+    <div className="panel">
+      <h2>What would it cost? <span className="tag supp">estimate, not a bill</span></h2>
+      <p className="sub">
+        Pick two cases and set your own assumptions. Depths and yields come
+        from the measured benchmark; everything else is your input — change
+        the numbers and watch the answer move.
+      </p>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        {[["A", topA, setTopA, condA, setCondA], ["B", topB, setTopB, condB, setCondB]].map(
+          ([label, top, setTop, cond, setCond]) => (
+            <div key={label}>
+              <h3>Geometry {label}</h3>
+              <label className="small">Topology{" "}
+                <select value={top} onChange={(e) => setTop(e.target.value)}>
+                  {topoNames.map((t) => {
+                    const nq = (rows.find((x) => x.topology === t) || {}).num_qubits;
+                    return <option key={t} value={t}>{t} ({nq} qubits)</option>;
+                  })}
+                </select>
+              </label>
+              <br />
+              <label className="small">Condition{" "}
+                <select value={cond} onChange={(e) => setCond(e.target.value)}>
+                  <option value="noisy">noisy</option>
+                  <option value="protected">protected</option>
+                </select>
+              </label>
+            </div>
+          )
+        )}
+      </div>
+      <h3 style={{ marginTop: 16 }}>Your assumptions</h3>
+      <ul className="small" style={{ paddingLeft: 20, margin: "8px 0", listStyle: "none" }}>
+        <li>Shots: {num(shots, setShots)}</li>
+        <li>Price per QPU-second ($): {num(price, setPrice)} <span className="muted">— third-party estimate; check IBM's pricing page</span></li>
+        <li>Time per two-qubit layer (µs): {num(tLayer, setTLayer)} <span className="muted">— assumed</span></li>
+        <li>Fixed overhead per shot (µs): {num(tFixed, setTFixed)} <span className="muted">— observed on our one ibm_fez job (4 s / 6000 shots)</span></li>
+      </ul>
+      <div className="metric-strip" role="region" aria-label="Cost estimate">
+        <div className="metric-cell">
+          <span className="k">{topA} ({condA})</span>
+          <span className="v" style={{ fontSize: 22 }}>${A.cost.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+          <span className="u">${A.per1k.toFixed(2)} per 1000 useful shots</span>
+        </div>
+        <div className="metric-cell">
+          <span className="k">{topB} ({condB})</span>
+          <span className="v" style={{ fontSize: 22 }}>${B.cost.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+          <span className="u">${B.per1k.toFixed(2)} per 1000 useful shots</span>
+        </div>
+        <div className="metric-cell">
+          <span className="k">Ratio A / B</span>
+          <span className="v" style={{ fontSize: 22 }}>{B.cost > 0 ? (A.cost / B.cost).toFixed(2) : "—"}×</span>
+          <span className="u">depths {A.d} vs {B.d}, yields {A.y.toFixed(3)} vs {B.y.toFixed(3)}</span>
+        </div>
+      </div>
+      {sizeNote && (
+        <p className="small" style={{ marginTop: 12 }}>
+          Note: different sizes ({A.r.num_qubits} vs {B.r.num_qubits} qubits) — the gap partly reflects size, not just geometry.
+        </p>
+      )}
+      <p className="muted small" style={{ marginTop: 8 }}>
+        Estimate only. Real bills depend on the provider's pricing, actual
+        device timing, queueing, and calibration overhead.
+      </p>
+    </div>
+  );
+}
+
 /** Real-hardware validation page: the t-shape case run on ibm_fez.
  *  Full provenance plus the explicit caveat that the hardware circuit
  *  differs from the abstract simulated pipeline. */
@@ -434,6 +540,7 @@ export default function App() {
       {tab === "cost" && (
         <main>
           <CostPanel scaling={scaling} />
+          <CostCalculator results={results} />
         </main>
       )}
       {tab === "hardware" && (
